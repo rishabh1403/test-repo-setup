@@ -5,7 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "cd server && yarn lint && cd ../client && yarn lint"
+    "lint": "yarn lint:server && yarn lint:client",
+    "lint:client": "cd client && yarn lint",
+    "lint:server": "cd server && yarn lint",
+    "postinstall": "yarn install:server && yarn install:client",
+    "install:server" : "cd server && yarn",
+    "install:client" : "cd client && yarn"
   },
   "repository": {
     "type": "git",
