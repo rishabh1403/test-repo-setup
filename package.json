@@ -6,13 +6,13 @@
   "scripts": {
     "test": "yarn test:server && yarn test:client",
     "test:server": "cd server && yarn test",
-    "test:client": "cd client && yarn test",
+    "test:client": "cd client && yarn test:once",
     "lint": "yarn lint:server && yarn lint:client",
     "lint:client": "cd client && yarn lint",
     "lint:server": "cd server && yarn lint",
     "postinstall": "yarn install:server && yarn install:client",
-    "install:server" : "cd server && yarn",
-    "install:client" : "cd client && yarn"
+    "install:server": "cd server && yarn",
+    "install:client": "cd client && yarn"
   },
   "repository": {
     "type": "git",
