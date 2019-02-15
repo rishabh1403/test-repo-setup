@@ -66,7 +66,7 @@ const LEFT = 0, UP = 1, RIGHT = 2, DOWN = 3;
 // keycodes
 const KEY_LEFT = 37, KEY_UP = 38, KEY_RIGHT = 39, KEY_DOWN = 40;
 
-let canvas, ctx, keystate, frames, score;
+let canvas, ctx, keystate, frames, score, animationLoop;
 
 // function setFood() {
 //   var empty = [];
@@ -194,7 +194,7 @@ class Game extends Component {
     this.update();
     this.draw();
     const loop = this.loop.bind(this);
-    window.requestAnimationFrame(loop, canvas);
+    animationLoop = window.requestAnimationFrame(loop, canvas);
   }
 
   update() {
@@ -244,7 +244,7 @@ class Game extends Component {
   
   
       grid.set(SNAKE, tail.x, tail.y);
-  
+      console.log(grid.grid);
       snake.insert(tail.x, tail.y);
     }
   
@@ -308,11 +308,11 @@ class Game extends Component {
     })
     socket.on("keydown", data => {
       keystate[parseInt(data)] = true
-      console.log(data);
+      // console.log(data);
     })
     socket.on("keyup", data => {
       delete keystate[parseInt(data)];
-      console.log(data);
+      // console.log(data);
     })
 
     this.init();
@@ -320,6 +320,7 @@ class Game extends Component {
   }
   componentWillUnmount() {
     document.body.removeChild(canvas);
+    window.cancelAnimationFrame(animationLoop);
   }
   render() {
     return (
