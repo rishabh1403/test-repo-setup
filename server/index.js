@@ -249,26 +249,18 @@ io.on('connection', (socket) => {
   })
 
   socket.on('disconnecting', () => {
-    console.log(Object.keys(socket.rooms)[1]); // get the room we set
+    console.log(Object.keys(socket.rooms)); // get the room we set
     io.to(Object.keys(socket.rooms)[1]).emit("Leave room");
   })
 
   socket.on('keydown', data => {
-    let newData = {
-      id : socket.id,
-      data,
-    }
-    io.to(Object.keys(socket.rooms)[1]).emit("keydown", data);
+    io.to(Object.keys(socket.rooms)[0]).emit("keydown", data);
   })
 
   socket.on('keyup', data => {
-    io.to(Object.keys(socket.rooms)[1]).emit("keyup", data);
+    io.to(Object.keys(socket.rooms)[0]).emit("keyup", data);
 
   })
-  // socket.on('updateGrid', data => {
-  //   io.to(Object.keys(socket.rooms)[1]).emit("updateGrid", data);
-
-  // })
 });
 
 
