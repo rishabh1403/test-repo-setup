@@ -8,23 +8,28 @@ import './App.css';
 class Grid {
 
   init(d, c, r) {
-      this.width = c;
-      this.height = r;
-      this._grid = [];
+    this.width = c;
+    this.height = r;
+    this._grid = [];
 
-      for (var x = 0; x < c; x++) {
-          this._grid.push([]);
-          for (var y = 0; y < r; y++) {
-              this._grid[x].push(d);
-          }
+    for (var x = 0; x < c; x++) {
+      this._grid.push([]);
+      for (var y = 0; y < r; y++) {
+        this._grid[x].push(d);
       }
+    }
   }
-
+  get grid() {
+    return this._grid;
+  }
+  set grid(grid) {
+    this._grid = JSON.parse(JSON.stringify(grid));
+  }
   set(val, x, y) {
-      this._grid[x][y] = val;
+    this._grid[x][y] = val;
   }
   get(x, y) {
-      return this._grid[x][y];
+    return this._grid[x][y];
   }
 }
 
@@ -34,16 +39,16 @@ class Snake {
 
   init(d, x, y) {
 
-      this.direction = d;
-      this._queue = [];
-      this.insert(x, y);
+    this.direction = d;
+    this._queue = [];
+    this.insert(x, y);
   }
   insert(x, y) {
-      this._queue.unshift({ x: x, y: y });
-      this.last = this._queue[0];
+    this._queue.unshift({ x: x, y: y });
+    this.last = this._queue[0];
   }
   remove() {
-      return this._queue.pop();
+    return this._queue.pop();
   }
 }
 
@@ -80,16 +85,16 @@ function setFood() {
 
 
 
-function init() {
-  score = 0;
-  grid.init(EMPTY, COLS, ROWS);
+// function init() {
+//   score = 0;
+//   grid.init(EMPTY, COLS, ROWS);
 
-  var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
-  snake.init(UP, sp.x, sp.y);
-  grid.set(SNAKE, sp.x, sp.y);
+//   var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
+//   snake.init(UP, sp.x, sp.y);
+//   grid.set(SNAKE, sp.x, sp.y);
 
-  setFood();
-}
+//   setFood();
+// }
 function loop() {
   update();
   draw();
@@ -129,13 +134,13 @@ function update() {
     ) {
       return init();
     }
-    let tail= null;
+    let tail = null;
     if (grid.get(nx, ny) === FOOD) {
       score++;
-       tail = { x: nx, y: ny }
+      tail = { x: nx, y: ny }
       setFood();
     } else {
-       tail = snake.remove();
+      tail = snake.remove();
       grid.set(EMPTY, tail.x, tail.y);
       tail.x = nx;
       tail.y = ny;
@@ -174,9 +179,19 @@ function draw() {
 
 class Game extends Component {
 
+  init() {
+    score = 0;
+    grid.init(EMPTY, COLS, ROWS);
 
+    var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
+    snake.init(UP, sp.x, sp.y);
+    grid.set(SNAKE, sp.x, sp.y);
 
-  componentWillMount() {
+    setFood();
+  }
+
+  componentDidMount() {
+    const { socket } = this.props;
     canvas = document.createElement("canvas");
     canvas.width = ROWS * 20;
     canvas.height = COLS * 20;
@@ -185,18 +200,29 @@ class Game extends Component {
 
     frames = 0;
     keystate = {};
-
+    // const that = this;
     document.addEventListener("keydown", function (evt) {
-      keystate[evt.keyCode] = true
+      // keystate[evt.keyCode] = true
+      socket.emit("keydown", evt.keyCode);
     })
 
     document.addEventListener("keyup", function (evt) {
-      delete keystate[evt.keyCode];
+      // delete keystate[evt.keyCode];
+      socket.emit("keyup", evt.keyCode);
     })
-    init();
+    socket.on("keydown", data => {
+      keystate[parseInt(data)] = true
+      console.log(data);
+    })
+    socket.on("keyup", data => {
+      delete keystate[parseInt(data)];
+      console.log(data);
+    })
+
+    this.init();
     loop();
   }
-  componentWillUnmount(){
+  componentWillUnmount() {
     document.body.removeChild(canvas);
   }
   render() {

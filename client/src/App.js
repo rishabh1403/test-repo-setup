@@ -44,7 +44,7 @@ class App extends Component {
   render() {
     return (
       <React.Fragment >
-        {this.state.start && <Game />}
+        {this.state.start && <Game socket={socket} />}
       </React.Fragment>
     );
   }

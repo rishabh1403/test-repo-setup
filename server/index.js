@@ -23,6 +23,16 @@ io.on('connection', (socket) => {
     console.log(Object.keys(socket.rooms)[1]); // get the room we set
     io.to(Object.keys(socket.rooms)[1]).emit("Leave room");
   })
+
+  socket.on('keydown', data => {
+    io.to(Object.keys(socket.rooms)[1]).emit("keydown", data);
+  })
+
+  socket.on('keyup', data => {
+    io.to(Object.keys(socket.rooms)[1]).emit("keyup", data);
+
+  })
+
 });
 
 
