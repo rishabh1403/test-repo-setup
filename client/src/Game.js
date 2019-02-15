@@ -33,7 +33,7 @@ class Grid {
   }
 }
 
-// ccd
+
 class Snake {
 
 
@@ -90,66 +90,74 @@ class Game extends Component {
   }
 
   update() {
+    const { socket } = this.props;
     frames++;
-  
-    if (keystate[KEY_LEFT] && snake.direction !== RIGHT) snake.direction = LEFT;
-    if (keystate[KEY_UP] && snake.direction !== DOWN) snake.direction = UP;
-    if (keystate[KEY_RIGHT] && snake.direction !== LEFT) snake.direction = RIGHT;
-    if (keystate[KEY_DOWN] && snake.direction !== UP) snake.direction = DOWN;
-  
-    if (frames % 10 === 0) {
-      var nx = snake.last.x;
-      var ny = snake.last.y;
-  
-      switch (snake.direction) {
-        case LEFT:
-          nx--
-          break;
-        case UP:
-          ny--;
-          break;
-        case RIGHT:
-          nx++;
-          break;
-        case DOWN:
-          ny++;
-          break;
-      }
-  
-      if (0 > nx || nx > grid.width - 1 ||
-        0 > ny || ny > grid.height - 1 ||
-        grid.get(nx, ny) === SNAKE
-      ) {
-        return this.init();
-      }
-      let tail = null;
-      if (grid.get(nx, ny) === FOOD) {
-        score++;
-        tail = { x: nx, y: ny }
-        this.setFood();
-      } else {
-        tail = snake.remove();
-        grid.set(EMPTY, tail.x, tail.y);
-        tail.x = nx;
-        tail.y = ny;
-      }
-  
-  
-      grid.set(SNAKE, tail.x, tail.y);
-      this.props.socket.emit("updateGrid", grid.grid);
-      console.log(grid.grid);
-      snake.insert(tail.x, tail.y);
+
+    if (keystate[KEY_LEFT] && snake.direction !== RIGHT) {
+      socket.emit("changeDirection", LEFT);
     }
-  
+    if (keystate[KEY_UP] && snake.direction !== DOWN) {
+      socket.emit("changeDirection", UP);
+    }
+    if (keystate[KEY_RIGHT] && snake.direction !== LEFT) {
+      socket.emit("changeDirection", RIGHT);
+    }
+    if (keystate[KEY_DOWN] && snake.direction !== UP) {
+      socket.emit("changeDirection", DOWN);
+    }
+
+    if (frames % 10 === 0) {
+      socket.emit("updateGame");
+      // var nx = snake.last.x;
+      // var ny = snake.last.y;
+
+      // switch (snake.direction) {
+      //   case LEFT:
+      //     nx--
+      //     break;
+      //   case UP:
+      //     ny--;
+      //     break;
+      //   case RIGHT:
+      //     nx++;
+      //     break;
+      //   case DOWN:
+      //     ny++;
+      //     break;
+      // }
+
+      // if (0 > nx || nx > grid.width - 1 ||
+      //   0 > ny || ny > grid.height - 1 ||
+      //   grid.get(nx, ny) === SNAKE
+      // ) {
+      //   return this.init();
+      // }
+      // let tail = null;
+      // if (grid.get(nx, ny) === FOOD) {
+      //   score++;
+      //   tail = { x: nx, y: ny }
+      //   this.setFood();
+      // } else {
+      //   tail = snake.remove();
+      //   grid.set(EMPTY, tail.x, tail.y);
+      //   tail.x = nx;
+      //   tail.y = ny;
+      // }
+
+
+      // grid.set(SNAKE, tail.x, tail.y);
+      // snake.insert(tail.x, tail.y);
+    }
+
   }
   draw(data) {
-    grid.grid = data;
-    var tw = canvas.width / grid.width;
-    var th = canvas.height / grid.height;
-  
-    for (var x = 0; x < grid.width; x++) {
-      for (var y = 0; y < grid.height; y++) {
-        switch (grid.get(x, y)) {
+    // grid.grid = data;
+    var tw = canvas.width / COLS;
+    var th = canvas.height / ROWS;
+
+    for (var x = 0; x < COLS; x++) {
+      for (var y = 0; y < ROWS; y++) {
+        switch (data[x][y]) {
           case EMPTY:
             ctx.fillStyle = "#fff";
             break;
@@ -168,7 +176,7 @@ class Game extends Component {
   }
   setFood() {
     var empty = [];
-  
+
     for (var x = 0; x < grid.width; x++) {
       for (var y = 0; y < grid.height; y++) {
         if (grid.get(x, y) === EMPTY) {
@@ -176,7 +184,7 @@ class Game extends Component {
         }
       }
     }
-  
+
     var randpos = empty[Math.floor(Math.random() * empty.length)];
     grid.set(FOOD, randpos.x, randpos.y);
   }
@@ -208,12 +216,14 @@ class Game extends Component {
       delete keystate[parseInt(data)];
       // console.log(data);
     })
-    socket.on("updateGrid", data => {
-      // delete keystate[parseInt(data)];
-      console.log(data);
-      this.draw(data);
+    socket.emit("init");
+    socket.on('gameOver', () => {
+      socket.emit("init");
     })
-    this.init();
+    socket.on("draw", (data) => {
+      this.draw(data)
+    })
+    // this.init();
     this.loop();
   }
   componentWillUnmount() {
