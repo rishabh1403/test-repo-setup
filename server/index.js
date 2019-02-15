@@ -13,12 +13,16 @@ const io = require('socket.io').listen(server);
 const sockets = [];
 
 io.on('connection', (socket) => {
-  socket.emit('connected',"Hey");
-  socket.on("joinRoom", (data)=>{
+  socket.emit('connected', "Hey");
+  socket.on("joinRoom", (data) => {
     console.log(data);
     socket.join(data);
-    io.to(data).emit("Joined room", io.sockets.adapter.rooms[data]);
+    io.to(data).emit("Joined room", io.sockets.adapter.rooms[data]); // get everyone in room
   });
+  socket.on('disconnecting', () => {
+    console.log(Object.keys(socket.rooms)[1]); // get the room we set
+    io.to(Object.keys(socket.rooms)[1]).emit("Leave room");
+  })
 });
 
 
