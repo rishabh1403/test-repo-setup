@@ -192,7 +192,7 @@ class Game extends Component {
 
   loop() {
     this.update();
-    this.draw();
+    // this.draw();
     const loop = this.loop.bind(this);
     animationLoop = window.requestAnimationFrame(loop, canvas);
   }
@@ -244,12 +244,14 @@ class Game extends Component {
   
   
       grid.set(SNAKE, tail.x, tail.y);
+      this.props.socket.emit("updateGrid", grid.grid);
       console.log(grid.grid);
       snake.insert(tail.x, tail.y);
     }
   
   }
-  draw() {
+  draw(data) {
+    grid.grid = data;
     var tw = canvas.width / grid.width;
     var th = canvas.height / grid.height;
   
@@ -314,7 +316,11 @@ class Game extends Component {
       delete keystate[parseInt(data)];
       // console.log(data);
     })
-
+    socket.on("updateGrid", data => {
+      // delete keystate[parseInt(data)];
+      console.log(data);
+      this.draw(data);
+    })
     this.init();
     this.loop();
   }

@@ -32,7 +32,10 @@ io.on('connection', (socket) => {
     io.to(Object.keys(socket.rooms)[1]).emit("keyup", data);
 
   })
+  socket.on('updateGrid', data => {
+    io.to(Object.keys(socket.rooms)[1]).emit("updateGrid", data);
 
+  })
 });
 
 
