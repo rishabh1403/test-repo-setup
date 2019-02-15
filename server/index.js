@@ -56,10 +56,11 @@ class Grid {
 class Snake {
 
 
-  init(d, x, y) {
+  init(d, x, y, id) {
 
     this.direction = d;
     this._queue = [];
+    this.id = id;
     this.insert(x, y);
   }
   insert(x, y) {
@@ -77,9 +78,12 @@ io.on('connection', (socket) => {
   socket.on("joinRoom", (data) => {
     console.log(data);
     socket.join(data);
+    console.log(io.sockets.adapter.rooms[data])
     if (io.sockets.adapter.rooms[data].length === 1) {
       gameData[data] = {};
       gameData[data].snake = new Snake();
+      gameData[data].snake2 = new Snake();
+      gameData[data].initDone = 0;
       gameData[data].grid = new Grid();
 
     }
@@ -87,38 +91,53 @@ io.on('connection', (socket) => {
   });
 
   socket.on("init", () => {
+
     let data = Object.keys(socket.rooms)[1];
     // if (!gameData[data].initDone) {
     gameData[data].score = 0;
-    gameData[data].grid.init(EMPTY, COLS, ROWS);
-    gameData[data].initDone = true;
-    var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
-    gameData[data].snake.init(UP, sp.x, sp.y);
-    gameData[data].grid.set(SNAKE, sp.x, sp.y);
-    // }
 
+    if (io.sockets.adapter.rooms[data].length === 2) {
+      let socketIDs = Object.keys(io.sockets.adapter.rooms[data].sockets);
+      gameData[data].grid.init(EMPTY, COLS, ROWS);
 
-    // setting food
+      var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
+      gameData[data].snake.init(UP, sp.x, sp.y, socketIDs[0]);
+      gameData[data].grid.set(SNAKE, sp.x, sp.y);
 
-    var empty = [];
+      sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
+      gameData[data].snake2.init(LEFT, sp.x, sp.y, socketIDs[1]);
+      gameData[data].grid.set(SNAKE, sp.x, sp.y);
 
-    for (var x = 0; x < gameData[data].grid.width; x++) {
-      for (var y = 0; y < gameData[data].grid.height; y++) {
-        if (gameData[data].grid.get(x, y) === EMPTY) {
-          empty.push({ x: x, y: y })
+      var empty = [];
+
+      for (var x = 0; x < gameData[data].grid.width; x++) {
+        for (var y = 0; y < gameData[data].grid.height; y++) {
+          if (gameData[data].grid.get(x, y) === EMPTY) {
+            empty.push({ x: x, y: y })
+          }
         }
       }
+
+      var randpos = empty[Math.floor(Math.random() * empty.length)];
+      gameData[data].grid.set(FOOD, randpos.x, randpos.y);
     }
 
-    var randpos = empty[Math.floor(Math.random() * empty.length)];
-    gameData[data].grid.set(FOOD, randpos.x, randpos.y);
+    gameData[data].initDone++;
+
+
+
     console.log("init fired");
-    console.log(gameData[data]);
+    // console.log(gameData[data]);
   })
 
   socket.on('changeDirection', (direction) => {
     let data = Object.keys(socket.rooms)[1]; // get the room we set
-    gameData[data].snake.direction = direction;
+    if(socket.id === gameData[data].snake.id){
+      gameData[data].snake.direction = direction;
+    }else{
+      gameData[data].snake2.direction = direction;
+    }
+    
   })
 
   socket.on('updateGame', () => {
@@ -126,6 +145,8 @@ io.on('connection', (socket) => {
     var nx = gameData[data].snake.last.x;
     var ny = gameData[data].snake.last.y;
 
+    var nx1 = gameData[data].snake2.last.x;
+    var ny1 = gameData[data].snake2.last.y;
     switch (gameData[data].snake.direction) {
       case LEFT:
         nx--
@@ -140,14 +161,35 @@ io.on('connection', (socket) => {
         ny++;
         break;
     }
-
+    switch (gameData[data].snake2.direction) {
+      case LEFT:
+        nx1--
+        break;
+      case UP:
+        ny1--;
+        break;
+      case RIGHT:
+        nx1++;
+        break;
+      case DOWN:
+        ny1++;
+        break;
+    }
     if (0 > nx || nx > gameData[data].grid.width - 1 ||
       0 > ny || ny > gameData[data].grid.height - 1 ||
       gameData[data].grid.get(nx, ny) === SNAKE
     ) {
+      gameData[data].initDone = 0;
       return socket.emit("gameOver");
     }
-    let tail = null;
+    if (0 > nx1 || nx1 > gameData[data].grid.width - 1 ||
+      0 > ny1 || ny1 > gameData[data].grid.height - 1 ||
+      gameData[data].grid.get(nx1, ny1) === SNAKE
+    ) {
+      gameData[data].initDone = 0;
+      return socket.emit("gameOver");
+    }
+    let tail = null, tail1 = null;
     if (gameData[data].grid.get(nx, ny) === FOOD) {
       gameData[data].score++;
       tail = { x: nx, y: ny }
@@ -173,9 +215,36 @@ io.on('connection', (socket) => {
       tail.y = ny;
     }
 
+    if (gameData[data].grid.get(nx1, ny1) === FOOD) {
+      gameData[data].score++;
+      tail1 = { x: nx1, y: ny1 }
+      // setting food
+
+      var empty = [];
+
+      for (var x = 0; x < gameData[data].grid.width; x++) {
+        for (var y = 0; y < gameData[data].grid.height; y++) {
+          if (gameData[data].grid.get(x, y) === EMPTY) {
+            empty.push({ x: x, y: y })
+          }
+        }
+      }
+
+      var randpos = empty[Math.floor(Math.random() * empty.length)];
+      gameData[data].grid.set(FOOD, randpos.x, randpos.y);
+
+    } else {
+      tail1 = gameData[data].snake2.remove();
+      gameData[data].grid.set(EMPTY, tail1.x, tail1.y);
+
+      tail1.x = nx1;
+      tail1.y = ny1;
+    }
 
     gameData[data].grid.set(SNAKE, tail.x, tail.y);
+    gameData[data].grid.set(SNAKE, tail1.x, tail1.y);
     gameData[data].snake.insert(tail.x, tail.y);
+    gameData[data].snake2.insert(tail1.x, tail1.y);
     socket.emit("draw", gameData[data].grid.grid);
   })
 
@@ -185,6 +254,10 @@ io.on('connection', (socket) => {
   })
 
   socket.on('keydown', data => {
+    let newData = {
+      id : socket.id,
+      data,
+    }
     io.to(Object.keys(socket.rooms)[1]).emit("keydown", data);
   })
 
