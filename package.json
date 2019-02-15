@@ -9,8 +9,8 @@
     "lint:client": "cd client && yarn lint",
     "lint:server": "cd server && yarn lint",
     "postinstall": "yarn install:server && yarn install:client",
-    "install:server" : "cd server && yarn",
-    "install:client" : "cd client && yarn"
+    "install:server": "cd server && yarn",
+    "install:client": "cd client && yarn"
   },
   "repository": {
     "type": "git",
