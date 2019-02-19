@@ -4,7 +4,9 @@
   "description": "## Realtime multiplayer snake game",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "yarn test:server && yarn test:client",
+    "test:server": "cd server && yarn test",
+    "test:client": "cd client && yarn test",
     "lint": "yarn lint:server && yarn lint:client",
     "lint:client": "cd client && yarn lint",
     "lint:server": "cd server && yarn lint",

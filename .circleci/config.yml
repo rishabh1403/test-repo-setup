@@ -4,7 +4,7 @@ jobs: # a collection of steps
   build: # runs not using Workflows must have a `build` job as entry point
     working_directory: ~/sneaky_snakes # directory where steps will run
     docker: # run the steps with Docker
-      - image: circleci/node:9.10.0 # ...with this image as the primary container; this is where all `steps` will run
+      - image: circleci/node:10.15.1 # ...with this image as the primary container; this is where all `steps` will run
     steps: # a collection of executable commands
       - checkout # special step to check out source code to working directory
       - restore_cache: # special step to restore the dependency cache
@@ -20,3 +20,6 @@ jobs: # a collection of steps
       - run: # run lint
           name: check for linting
           command: yarn lint
+      - run: # run tests
+          name: running tests
+          command: yarn test
