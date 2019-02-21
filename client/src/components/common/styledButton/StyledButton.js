@@ -4,12 +4,13 @@ import { Button } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 
 const StyledButton = ({
-  text, url, size, color, link, inverted,
+  text, url, size, color, link, inverted, fluid,
 }) => {
   const buttonProps = {
     text,
-    size: size || 'massive',
-    color: color || 'violet',
+    fluid,
+    size,
+    color,
     to: url,
     inverted,
     as: link ? Link : Button,
@@ -23,9 +24,10 @@ const StyledButton = ({
 
 StyledButton.defaultProps = {
   url: '',
-  size: '',
-  color: '',
+  size: 'massive',
+  color: 'violet',
   link: false,
+  fluid: false,
   inverted: false,
 };
 
@@ -35,6 +37,7 @@ StyledButton.propTypes = {
   size: PropTypes.string,
   color: PropTypes.string,
   link: PropTypes.bool,
+  fluid: PropTypes.bool,
   inverted: PropTypes.bool,
 };
 export default StyledButton;

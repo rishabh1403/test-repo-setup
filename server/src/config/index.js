@@ -10,4 +10,4 @@ export const secrets = {
   jwt: process.env.JWT_SECRET,
   jwtExp: process.env.JWT_EXPIRY,
 };
-export const dbUrl = `${process.env.MONGODB_URI}${isTest ? 'Test' : ''}`;
+export const dbUrl = `${process.env.MONGODB_URI}${isTest ? 'test' : ''}`;

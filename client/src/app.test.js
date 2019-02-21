@@ -22,11 +22,4 @@ describe('<App />', () => {
       expect(switchWrapper.length).toBe(1);
     });
   });
-
-  describe('rendered switch cpomponent', () => {
-    it('should render two route component', () => {
-      const routeWrapper = wrapper.find('Switch').find('Route');
-      expect(routeWrapper.length).toBe(2);
-    });
-  });
 });
