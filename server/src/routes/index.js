@@ -7,7 +7,7 @@ const setupRoutes = app => {
   app.use('/auth', authRouter);
   app.use('/api', authenticate);
   app.use('/api/me', userRouter);
-  app.use('/api/', scoreRouter);
+  app.use('/api/leaderboard', scoreRouter);
 };
 
 export default setupRoutes;

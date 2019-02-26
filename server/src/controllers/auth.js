@@ -15,7 +15,7 @@ export const signup = async (req, res) => {
           from: 'adityasmksaxena@gmail.com',
           subject: 'Sneaky Snakes Account Email Verification',
           text: `Hi ${name},`,
-          html: `<p>Click on the link to verify email account</ br><a href="http://localhost:${serverPort}/auth/token/${token}"></a></p>`,
+          html: `<p>Click on <a href="http://localhost:${serverPort}/auth/token/${token}">this link</a> to verify email account</ br></p>`,
         };
         await Mailer.send(msg);
       } catch (error) {
