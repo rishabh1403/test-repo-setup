@@ -1,3 +1,3 @@
-const app = require('express')();
+import { startServer } from './src/server';
 
-app.listen('8000', () => console.log('Server listening on port 8000')); // eslint-disable-line
+startServer();
