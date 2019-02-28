@@ -110,23 +110,14 @@ export const init = server => {
       let data = Object.keys(socket.rooms)[1];
       let { nx, ny } = getNewSnakePosition(gameData[data].snake);
       let { nx: nx1, ny: ny1 } = getNewSnakePosition(gameData[data].snake2);
+      if (isGameOver(nx, ny, nx1, ny1, gameData[data])) {
+        gameData[data].initDone = 0;
+        return socket.emit("gameOver");
+      }
 
-      if (0 > nx || nx > gameData[data].grid.width - 1 ||
-        0 > ny || ny > gameData[data].grid.height - 1 ||
-        gameData[data].grid.get(nx, ny) === SNAKE
-      ) {
-        gameData[data].initDone = 0;
-        return socket.emit("gameOver");
-      }
-      if (0 > nx1 || nx1 > gameData[data].grid.width - 1 ||
-        0 > ny1 || ny1 > gameData[data].grid.height - 1 ||
-        gameData[data].grid.get(nx1, ny1) === SNAKE
-      ) {
-        gameData[data].initDone = 0;
-        return socket.emit("gameOver");
-      }
       let tail = null, tail1 = null;
-      if (gameData[data].grid.get(nx, ny) === FOOD) {
+      
+      if (isNewPositionFood(nx, ny, gameData[data])) {
         gameData[data].score++;
         tail = { x: nx, y: ny }
         // setting food
@@ -151,7 +142,7 @@ export const init = server => {
         tail.y = ny;
       }
 
-      if (gameData[data].grid.get(nx1, ny1) === FOOD) {
+      if (isNewPositionFood(nx1, ny1, gameData[data])) {
         gameData[data].score++;
         tail1 = { x: nx1, y: ny1 }
         // setting food
@@ -200,7 +191,9 @@ export const init = server => {
   });
 
 }
-
+function isNewPositionFood(nx, ny, gameData) {
+  return gameData.grid.get(nx, ny) === FOOD;
+}
 function getNewSnakePosition(snake) {
   var nx = snake.last.x;
   var ny = snake.last.y;
@@ -219,4 +212,21 @@ function getNewSnakePosition(snake) {
       break;
   }
   return { nx, ny };
+}
+function isGameOver(nx, ny, nx1, ny1, gameData) {
+  if (0 > nx || nx > gameData.grid.width - 1 ||
+    0 > ny || ny > gameData.grid.height - 1 ||
+    gameData.grid.get(nx, ny) === SNAKE
+  ) {
+    return true;
+  }
+
+  if (0 > nx1 || nx1 > gameData.grid.width - 1 ||
+    0 > ny1 || ny1 > gameData.grid.height - 1 ||
+    gameData.grid.get(nx1, ny1) === SNAKE
+  ) {
+    return true;
+  }
+
+  return false;
 }
