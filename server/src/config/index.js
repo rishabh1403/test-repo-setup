@@ -11,3 +11,4 @@ export const secrets = {
   jwtExp: process.env.JWT_EXPIRY,
 };
 export const dbUrl = `${process.env.MONGODB_URI}${isTest ? 'test' : ''}`;
+export const sendGridApiKey = process.env.SEND_GRID_API_KEY;

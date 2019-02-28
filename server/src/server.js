@@ -2,7 +2,7 @@ import express from 'express';
 import { json, urlencoded } from 'body-parser';
 import cors from 'cors';
 import { serverPort } from './config';
-import { connectDb, disconnectDb } from './db/mongoose';
+import { connectDb, disconnectDb } from './config/db';
 import setupRoutes from './routes';
 
 export const app = express();

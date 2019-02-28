@@ -15,23 +15,24 @@ beforeAll(async () => {
   })(baseURL);
 });
 
-let user1Token;
-beforeEach(async () => {
-  const result = await populateUsers();
-  // eslint-disable-next-line prefer-destructuring
-  user1Token = result[0];
-});
 afterAll(() => server.close());
 
-beforeEach(populateUsers);
+let User1SignupToken;
+beforeEach(async () => {
+  const [result0] = await populateUsers();
+  User1SignupToken = result0;
+});
+
 afterEach(emptyUsers);
 describe(`GET '/api/me'`, () => {
   it('should return user if authenticated', async () => {
     expect.assertions(3);
+    const urlValidateUserEmailAccount = generateUrl(`/auth/token/${User1SignupToken}`);
+    const resValidateUser = await fetch(urlValidateUserEmailAccount);
     const url = generateUrl('/api/me');
     const res = await fetch(url, {
       headers: {
-        'x-auth': user1Token,
+        'x-auth': resValidateUser.headers.get('x-auth'),
       },
     });
     expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);

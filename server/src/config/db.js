@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { dbUrl } from '../config';
+import { dbUrl } from './index';
 
 export const connectDb = (url = dbUrl, opts = {}) =>
   mongoose.connect(url, {

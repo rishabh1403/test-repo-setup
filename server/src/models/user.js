@@ -26,6 +26,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  active: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // instance methods
@@ -37,11 +41,10 @@ UserSchema.methods.toJSON = function toJSON() {
 };
 
 // generates Authentication token
-UserSchema.methods.generateAuthToken = function generateAuthToken() {
+UserSchema.methods.generateToken = function generateToken() {
   const user = this;
-  const access = 'auth';
   const { _id } = user;
-  const token = jwt.sign({ _id, access }, secrets.jwt, { expiresIn: secrets.jwtExp }).toString();
+  const token = jwt.sign({ _id }, secrets.jwt, { expiresIn: secrets.jwtExp }).toString();
   return token;
 };
 
@@ -56,6 +59,15 @@ UserSchema.methods.hashPassword = async function hashPassword() {
 };
 
 // model methods
+UserSchema.statics.createUser = async function createUser({ name, email, password }) {
+  const User = this;
+  const user = await new User({ name, email, password });
+  await user.validate();
+  await user.hashPassword();
+  await user.save();
+  return user;
+};
+
 UserSchema.statics.findByToken = async function findByToken(token) {
   const User = this;
   let decoded;
@@ -66,6 +78,9 @@ UserSchema.statics.findByToken = async function findByToken(token) {
   }
   const { _id } = decoded;
   const user = await User.findOne({ _id });
+  if (!user) {
+    throw new Error('user not found');
+  }
   return user;
 };
 
