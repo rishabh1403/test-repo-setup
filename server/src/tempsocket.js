@@ -31,7 +31,7 @@ function connectedEvent(socket) {
 function initGame(room) {
   gameData[room] = {};
   gameData[room].snake = new Snake();
-  gameData[room].snake2 = new Snake();
+  gameData[room].opponentSnake = new Snake();
   gameData[room].initDone = 0;
   gameData[room].grid = new Grid();
 }
@@ -69,7 +69,7 @@ function putSnakes(socketIDs, room) {
   gameData[room].grid.set(SNAKE, sp.x, sp.y);
 
   sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
-  gameData[room].snake2.init(LEFT, sp.x, sp.y, socketIDs[1]);
+  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1]);
   gameData[room].grid.set(SNAKE, sp.x, sp.y);
 }
 function initEvent(io, socket) {
@@ -114,7 +114,7 @@ function changeDirectionEvent(socket) {
     if (socket.id === gameData[room].snake.id) {
       gameData[room].snake.direction = direction;
     } else {
-      gameData[room].snake2.direction = direction;
+      gameData[room].opponentSnake.direction = direction;
     }
 
   })
@@ -122,16 +122,16 @@ function changeDirectionEvent(socket) {
 function updateGameEvent(socket) {
   socket.on('updateGame', () => {
     let room = getUserGameRoom(socket);
-    let { nx, ny } = getNewSnakePosition(gameData[room].snake);
-    let { nx: nx1, ny: ny1 } = getNewSnakePosition(gameData[room].snake2);
-    if (isGameOver(nx, ny, nx1, ny1, gameData[room])) {
+    let { snakeNewPositionX, snakeNewPositionY } = getNewSnakePosition(gameData[room].snake);
+    let { snakeNewPositionX: opponentSnakeNewPositionX, snakeNewPositionY: opponentSnakeNewPositionY } = getNewSnakePosition(gameData[room].opponentSnake);
+    if (isGameOver(snakeNewPositionX, snakeNewPositionY, opponentSnakeNewPositionX, opponentSnakeNewPositionY, gameData[room])) {
       gameData[room].initDone = 0;
       return socket.emit("gameOver");
     }
-    let tail = getTail(room, nx, ny, 'snake')
-    let tail1 = getTail(room, nx1, ny1, 'snake2')
+    let tail = getTail(room, snakeNewPositionX, snakeNewPositionY, 'snake')
+    let opponentSnakeTail = getTail(room, opponentSnakeNewPositionX, opponentSnakeNewPositionY, 'opponentSnake')
 
-    addTail(room, tail, tail1);
+    addTail(room, tail, opponentSnakeTail);
 
     socket.emit("draw", gameData[room].grid.grid);
   })
@@ -157,11 +157,11 @@ export const init = server => {
   const io = socketio.listen(server);
   setupEvents(io);
 }
-function getTail(room, nx, ny, snake) {
+function getTail(room, snakeNewPositionX, snakeNewPositionY, snake) {
   let tail = null;
-  if (isNewPositionFood(nx, ny, gameData[room])) {
+  if (isNewPositionFood(snakeNewPositionX, snakeNewPositionY, gameData[room])) {
     gameData[room].score++;
-    tail = { x: nx, y: ny }
+    tail = { x: snakeNewPositionX, y: snakeNewPositionY }
     // setting food
 
     addNewFood(room);
@@ -169,47 +169,47 @@ function getTail(room, nx, ny, snake) {
   } else {
     tail = gameData[room][snake].remove();
     gameData[room].grid.set(EMPTY, tail.x, tail.y);
-    tail.x = nx;
-    tail.y = ny;
+    tail.x = snakeNewPositionX;
+    tail.y = snakeNewPositionY;
   }
   return tail;
 }
-function addTail(room, tail, tail1) {
+function addTail(room, tail, opponentSnakeTail) {
   gameData[room].grid.set(SNAKE, tail.x, tail.y);
-  gameData[room].grid.set(SNAKE, tail1.x, tail1.y);
+  gameData[room].grid.set(SNAKE, opponentSnakeTail.x, opponentSnakeTail.y);
   gameData[room].snake.insert(tail.x, tail.y);
-  gameData[room].snake2.insert(tail1.x, tail1.y);
+  gameData[room].opponentSnake.insert(opponentSnakeTail.x, opponentSnakeTail.y);
 }
-function isNewPositionFood(nx, ny, gameData) {
-  return gameData.grid.get(nx, ny) === FOOD;
+function isNewPositionFood(snakeNewPositionX, snakeNewPositionY, gameData) {
+  return gameData.grid.get(snakeNewPositionX, snakeNewPositionY) === FOOD;
 }
 function getNewSnakePosition(snake) {
-  var nx = snake.last.x;
-  var ny = snake.last.y;
+  var snakeNewPositionX = snake.last.x;
+  var snakeNewPositionY = snake.last.y;
   switch (snake.direction) {
     case LEFT:
-      nx--
+      snakeNewPositionX--
       break;
     case UP:
-      ny--;
+      snakeNewPositionY--;
       break;
     case RIGHT:
-      nx++;
+      snakeNewPositionX++;
       break;
     case DOWN:
-      ny++;
+      snakeNewPositionY++;
       break;
   }
-  return { nx, ny };
+  return { snakeNewPositionX, snakeNewPositionY };
 }
-function isNewPositionBorder(nx, ny, gameData) {
-  return 0 > nx || nx > gameData.grid.width - 1 ||
-    0 > ny || ny > gameData.grid.height - 1;
+function isNewPositionBorder(snakeNewPositionX, snakeNewPositionY, gameData) {
+  return 0 > snakeNewPositionX || snakeNewPositionX > gameData.grid.width - 1 ||
+    0 > snakeNewPositionY || snakeNewPositionY > gameData.grid.height - 1;
 }
-function isNewPositionSnake(nx, ny, gameData) {
-  return gameData.grid.get(nx, ny) === SNAKE;
+function isNewPositionSnake(snakeNewPositionX, snakeNewPositionY, gameData) {
+  return gameData.grid.get(snakeNewPositionX, snakeNewPositionY) === SNAKE;
 }
-function isGameOver(nx, ny, nx1, ny1, gameData) {
-  return isNewPositionBorder(nx, ny, gameData) || isNewPositionSnake(nx, ny, gameData) ||
-    isNewPositionBorder(nx1, ny1, gameData) || isNewPositionSnake(nx1, ny1, gameData);
+function isGameOver(snakeNewPositionX, snakeNewPositionY, opponentSnakeNewPositionX, opponentSnakeNewPositionY, gameData) {
+  return isNewPositionBorder(snakeNewPositionX, snakeNewPositionY, gameData) || isNewPositionSnake(snakeNewPositionX, snakeNewPositionY, gameData) ||
+    isNewPositionBorder(opponentSnakeNewPositionX, opponentSnakeNewPositionY, gameData) || isNewPositionSnake(opponentSnakeNewPositionX, opponentSnakeNewPositionY, gameData);
 }
