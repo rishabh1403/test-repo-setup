@@ -1,27 +1,30 @@
 export default class Grid {
-
   init(d, c, r) {
     this.width = c;
     this.height = r;
-    this._grid = [];
+    this.state = [];
 
-    for (var x = 0; x < c; x++) {
-      this._grid.push([]);
-      for (var y = 0; y < r; y++) {
-        this._grid[x].push(d);
+    for (let x = 0; x < c; x += 1) {
+      this.state.push([]);
+      for (let y = 0; y < r; y += 1) {
+        this.state[x].push(d);
       }
     }
   }
+
   get grid() {
-    return this._grid;
+    return this.state;
   }
-  set grid(grid) {
-    this._grid = JSON.parse(JSON.stringify(grid));
+
+  set grid(newState) {
+    this.state = JSON.parse(JSON.stringify(newState));
   }
+
   set(val, x, y) {
-    this._grid[x][y] = val;
+    this.state[x][y] = val;
   }
+
   get(x, y) {
-    return this._grid[x][y];
+    return this.state[x][y];
   }
 }
