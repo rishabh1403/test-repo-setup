@@ -1,6 +1,6 @@
 /* eslint-disable */
 import socketio from 'socket.io';
-import { gameConstants } from './utils/contants';
+import { gameConstants } from '../utils/contants';
 const {
   ROWS,
   COLS,
