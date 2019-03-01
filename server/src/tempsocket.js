@@ -19,39 +19,19 @@ const {
 } = gameConstants;
 import Grid from './Grid';
 import Snake from './Snake';
-
+const gameData = {};
 export const init = server => {
   const io = socketio.listen(server);
-
-  console.log('sss');
-
-  const gameData = {};
-  // dimensions
-  // const ROWS = 26, COLS = 26;
-
-  // // Ids for grid
-  // const EMPTY = 0, SNAKE = 1, FOOD = 2;
-
-
-  // //Ids for direction
-  // const LEFT = 0, UP = 1, RIGHT = 2, DOWN = 3;
-
-  // // keycodes
-  // const KEY_LEFT = 37, KEY_UP = 38, KEY_RIGHT = 39, KEY_DOWN = 40;
 
   io.on('connection', (socket) => {
     socket.emit('connected', "Hey");
     socket.on("joinRoom", (data) => {
       console.log(data);
       socket.join(data);
+
       console.log(io.sockets.adapter.rooms[data])
       if (io.sockets.adapter.rooms[data].length === 1) {
-        gameData[data] = {};
-        gameData[data].snake = new Snake();
-        gameData[data].snake2 = new Snake();
-        gameData[data].initDone = 0;
-        gameData[data].grid = new Grid();
-
+        initGame(data);
       }
       io.to(data).emit("Joined room", io.sockets.adapter.rooms[data]); // get everyone in room
     });
@@ -116,24 +96,13 @@ export const init = server => {
       }
 
       let tail = null, tail1 = null;
-      
+
       if (isNewPositionFood(nx, ny, gameData[data])) {
         gameData[data].score++;
         tail = { x: nx, y: ny }
         // setting food
 
-        var empty = [];
-
-        for (var x = 0; x < gameData[data].grid.width; x++) {
-          for (var y = 0; y < gameData[data].grid.height; y++) {
-            if (gameData[data].grid.get(x, y) === EMPTY) {
-              empty.push({ x: x, y: y })
-            }
-          }
-        }
-
-        var randpos = empty[Math.floor(Math.random() * empty.length)];
-        gameData[data].grid.set(FOOD, randpos.x, randpos.y);
+        addNewFood(data);
 
       } else {
         tail = gameData[data].snake.remove();
@@ -147,18 +116,9 @@ export const init = server => {
         tail1 = { x: nx1, y: ny1 }
         // setting food
 
-        var empty = [];
+        
+        addNewFood(data);
 
-        for (var x = 0; x < gameData[data].grid.width; x++) {
-          for (var y = 0; y < gameData[data].grid.height; y++) {
-            if (gameData[data].grid.get(x, y) === EMPTY) {
-              empty.push({ x: x, y: y })
-            }
-          }
-        }
-
-        var randpos = empty[Math.floor(Math.random() * empty.length)];
-        gameData[data].grid.set(FOOD, randpos.x, randpos.y);
 
       } else {
         tail1 = gameData[data].snake2.remove();
@@ -168,10 +128,8 @@ export const init = server => {
         tail1.y = ny1;
       }
 
-      gameData[data].grid.set(SNAKE, tail.x, tail.y);
-      gameData[data].grid.set(SNAKE, tail1.x, tail1.y);
-      gameData[data].snake.insert(tail.x, tail.y);
-      gameData[data].snake2.insert(tail1.x, tail1.y);
+      addTail(data, tail, tail1);
+
       socket.emit("draw", gameData[data].grid.grid);
     })
 
@@ -190,6 +148,32 @@ export const init = server => {
     })
   });
 
+}
+function addNewFood(data) {
+  var empty = [];
+  for (var x = 0; x < gameData[data].grid.width; x++) {
+    for (var y = 0; y < gameData[data].grid.height; y++) {
+      if (gameData[data].grid.get(x, y) === EMPTY) {
+        empty.push({ x: x, y: y })
+      }
+    }
+  }
+
+  var randpos = empty[Math.floor(Math.random() * empty.length)];
+  gameData[data].grid.set(FOOD, randpos.x, randpos.y);
+}
+function addTail(data, tail, tail1) {
+  gameData[data].grid.set(SNAKE, tail.x, tail.y);
+  gameData[data].grid.set(SNAKE, tail1.x, tail1.y);
+  gameData[data].snake.insert(tail.x, tail.y);
+  gameData[data].snake2.insert(tail1.x, tail1.y);
+}
+function initGame(data) {
+  gameData[data] = {};
+  gameData[data].snake = new Snake();
+  gameData[data].snake2 = new Snake();
+  gameData[data].initDone = 0;
+  gameData[data].grid = new Grid();
 }
 function isNewPositionFood(nx, ny, gameData) {
   return gameData.grid.get(nx, ny) === FOOD;
