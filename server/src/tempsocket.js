@@ -58,60 +58,73 @@ function initEvent(io, socket) {
   })
 }
 
+function changeDirectionEvent(socket){
 
+  socket.on('changeDirection', (direction) => {
+    let data = Object.keys(socket.rooms)[1]; // get the room we set
+    if (socket.id === gameData[data].snake.id) {
+      gameData[data].snake.direction = direction;
+    } else {
+      gameData[data].snake2.direction = direction;
+    }
 
-export const init = server => {
-  const io = socketio.listen(server);
+  })
+}
 
+function updateGameEvent(socket){
+  socket.on('updateGame', () => {
+    let data = Object.keys(socket.rooms)[1];
+    let { nx, ny } = getNewSnakePosition(gameData[data].snake);
+    let { nx: nx1, ny: ny1 } = getNewSnakePosition(gameData[data].snake2);
+    if (isGameOver(nx, ny, nx1, ny1, gameData[data])) {
+      gameData[data].initDone = 0;
+      return socket.emit("gameOver");
+    }
+    let tail = getTail(data, nx, ny, 'snake')
+    let tail1 = getTail(data, nx1, ny1, 'snake2')
+
+    addTail(data, tail, tail1);
+
+    socket.emit("draw", gameData[data].grid.grid);
+  })
+}
+
+function disconnectingEvent(io, socket){
+  socket.on('disconnecting', () => {
+    console.log(Object.keys(socket.rooms)); // get the room we set
+    io.to(Object.keys(socket.rooms)[1]).emit("Leave room");
+  })
+}
+function keydownEvent(io, socket){
+  socket.on('keydown', data => {
+    io.to(Object.keys(socket.rooms)[0]).emit("keydown", data);
+  })
+}
+function keyupEvent(io, socket){
+
+  socket.on('keyup', data => {
+    io.to(Object.keys(socket.rooms)[0]).emit("keyup", data);
+
+  })
+}
+
+function setupEvents(io){
   io.on('connection', (socket) => {
     socket.emit('connected', "Hey");
     joinRoomEvent(io, socket);
     initEvent(io,socket);
-
-
-    socket.on('changeDirection', (direction) => {
-      let data = Object.keys(socket.rooms)[1]; // get the room we set
-      if (socket.id === gameData[data].snake.id) {
-        gameData[data].snake.direction = direction;
-      } else {
-        gameData[data].snake2.direction = direction;
-      }
-
-    })
-
-    socket.on('updateGame', () => {
-      let data = Object.keys(socket.rooms)[1];
-      let { nx, ny } = getNewSnakePosition(gameData[data].snake);
-      let { nx: nx1, ny: ny1 } = getNewSnakePosition(gameData[data].snake2);
-      if (isGameOver(nx, ny, nx1, ny1, gameData[data])) {
-        gameData[data].initDone = 0;
-        return socket.emit("gameOver");
-      }
-
-      // let tail = null, tail1 = null;
-
-      let tail = getTail(data, nx, ny, 'snake')
-      let tail1 = getTail(data, nx1, ny1, 'snake2')
-
-      addTail(data, tail, tail1);
-
-      socket.emit("draw", gameData[data].grid.grid);
-    })
-
-    socket.on('disconnecting', () => {
-      console.log(Object.keys(socket.rooms)); // get the room we set
-      io.to(Object.keys(socket.rooms)[1]).emit("Leave room");
-    })
-
-    socket.on('keydown', data => {
-      io.to(Object.keys(socket.rooms)[0]).emit("keydown", data);
-    })
-
-    socket.on('keyup', data => {
-      io.to(Object.keys(socket.rooms)[0]).emit("keyup", data);
-
-    })
+    changeDirectionEvent(socket);
+    updateGameEvent(socket);
+    disconnectingEvent(io, socket);
+    keydownEvent(io, socket);
+    keyupEvent(io, socket);
   });
+}
+
+export const init = server => {
+  const io = socketio.listen(server);
+  setupEvents(io);
+  
 
 }
 
