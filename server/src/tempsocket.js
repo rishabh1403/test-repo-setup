@@ -49,14 +49,14 @@ function joinRoomEvent(io, socket) {
   });
 }
 function getEmptyCells(room) {
-  var empty = [];
-  for (var x = 0; x < gameData[room].grid.width; x++) {
-    for (var y = 0; y < gameData[room].grid.height; y++) {
-      if (gameData[room].grid.get(x, y) === EMPTY) {
-        empty.push({ x: x, y: y })
-      }
-    }
-  }
+  let empty = new Array(gameData[room].grid.width).fill()
+    .reduce((acc,el,x) => {
+      let newRow = new Array(gameData[room].grid.height).fill()
+      .reduce((acc,el,y) => {
+        return [...acc,{x,y}];
+      },[])
+      return [...acc, ...newRow];
+    },[])
   return empty;
 }
 function addNewFood(room) {
