@@ -174,15 +174,11 @@ function getTail(room, snakeNewPosition, snake) {
   if (isNewPositionFood(snakeNewPosition.x, snakeNewPosition.y, gameData[room])) {
     gameData[room].score++;
     tail = { x: snakeNewPosition.x, y: snakeNewPosition.y }
-    // setting food
-
     addNewFood(room);
-
   } else {
     tail = gameData[room][snake].remove();
     gameData[room].grid.set(EMPTY, tail.x, tail.y);
-    tail.x = snakeNewPosition.x;
-    tail.y = snakeNewPosition.y;
+    tail = { x: snakeNewPosition.x, y: snakeNewPosition.y }
   }
   return tail;
 }
