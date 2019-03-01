@@ -20,50 +20,54 @@ const {
 import Grid from './Grid';
 import Snake from './Snake';
 const gameData = {};
+
+function joinRoomEvent(io, socket) {
+  socket.on("joinRoom", (data) => {
+    console.log(data);
+    socket.join(data);
+
+    console.log(io.sockets.adapter.rooms[data])
+    if (io.sockets.adapter.rooms[data].length === 1) {
+      initGame(data);
+    }
+    io.to(data).emit("Joined room", io.sockets.adapter.rooms[data]); // get everyone in room
+  });
+}
+
+function initEvent(io, socket) {
+  socket.on("init", () => {
+
+    let data = Object.keys(socket.rooms)[1];
+    // if (!gameData[data].initDone) {
+    gameData[data].score = 0;
+
+    if (io.sockets.adapter.rooms[data].length === 2) {
+      let socketIDs = Object.keys(io.sockets.adapter.rooms[data].sockets);
+
+      putSnakes(socketIDs, data);
+
+      addNewFood(data);
+    }
+
+    gameData[data].initDone++;
+
+
+
+    console.log("init fired");
+    // console.log(gameData[data]);
+  })
+}
+
+
+
 export const init = server => {
   const io = socketio.listen(server);
 
   io.on('connection', (socket) => {
     socket.emit('connected', "Hey");
-    socket.on("joinRoom", (data) => {
-      console.log(data);
-      socket.join(data);
+    joinRoomEvent(io, socket);
+    initEvent(io,socket);
 
-      console.log(io.sockets.adapter.rooms[data])
-      if (io.sockets.adapter.rooms[data].length === 1) {
-        initGame(data);
-      }
-      io.to(data).emit("Joined room", io.sockets.adapter.rooms[data]); // get everyone in room
-    });
-
-    socket.on("init", () => {
-
-      let data = Object.keys(socket.rooms)[1];
-      // if (!gameData[data].initDone) {
-      gameData[data].score = 0;
-
-      if (io.sockets.adapter.rooms[data].length === 2) {
-        let socketIDs = Object.keys(io.sockets.adapter.rooms[data].sockets);
-        gameData[data].grid.init(EMPTY, COLS, ROWS);
-
-        var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
-        gameData[data].snake.init(UP, sp.x, sp.y, socketIDs[0]);
-        gameData[data].grid.set(SNAKE, sp.x, sp.y);
-
-        sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
-        gameData[data].snake2.init(LEFT, sp.x, sp.y, socketIDs[1]);
-        gameData[data].grid.set(SNAKE, sp.x, sp.y);
-
-        addNewFood(data);
-      }
-
-      gameData[data].initDone++;
-
-
-
-      console.log("init fired");
-      // console.log(gameData[data]);
-    })
 
     socket.on('changeDirection', (direction) => {
       let data = Object.keys(socket.rooms)[1]; // get the room we set
@@ -109,6 +113,19 @@ export const init = server => {
     })
   });
 
+}
+
+
+function putSnakes(socketIDs, data) {
+  gameData[data].grid.init(EMPTY, COLS, ROWS);
+
+  var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
+  gameData[data].snake.init(UP, sp.x, sp.y, socketIDs[0]);
+  gameData[data].grid.set(SNAKE, sp.x, sp.y);
+
+  sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
+  gameData[data].snake2.init(LEFT, sp.x, sp.y, socketIDs[1]);
+  gameData[data].grid.set(SNAKE, sp.x, sp.y);
 }
 function getTail(data, nx, ny, snake) {
   let tail = null;
