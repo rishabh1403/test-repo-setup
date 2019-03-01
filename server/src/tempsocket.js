@@ -81,23 +81,14 @@ function putSnakes(socketIDs, room) {
 }
 function initEvent(io, socket) {
   socket.on("init", () => {
-
     let room = getUserGameRoom(socket);
-    // if (!gameData[data].initDone) {
     gameData[room].score = 0;
-
     if (io.sockets.adapter.rooms[room].length === 2) {
       let socketIDs = Object.keys(io.sockets.adapter.rooms[room].sockets);
-
       putSnakes(socketIDs, room);
-
       addNewFood(room);
     }
-
     gameData[room].initDone++;
-
-
-
     console.log("init fired");
     // console.log(gameData[data]);
   })
@@ -145,7 +136,6 @@ function updateGameEvent(socket) {
 }
 function disconnectingEvent(io, socket) {
   socket.on('disconnecting', () => {
-    // console.log(Object.keys(socket.rooms)); // get the room we set
     io.to(getUserGameRoom(socket)).emit("Leave room");
   })
 }
