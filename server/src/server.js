@@ -2,7 +2,7 @@ import express from 'express';
 import { json, urlencoded } from 'body-parser';
 import cors from 'cors';
 import http from 'http';
-import { init } from './tempsocket';
+import * as socket from './gameEngine/socket';
 import { serverPort } from './config';
 import { connectDb, disconnectDb } from './config/db';
 import setupRoutes from './routes';
@@ -20,15 +20,8 @@ app.use(urlencoded({ extended: true }));
 setupRoutes(app);
 
 export const server = http.createServer(app);
-init(server);
+socket.init(server);
 
-/*
-
-//////////////////////////////
-
-*/
-
-///////////////////////////////
 export const startServer = async ({ port = serverPort } = {}) => {
   try {
     await connectDb();
