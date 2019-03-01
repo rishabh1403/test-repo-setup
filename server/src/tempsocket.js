@@ -142,16 +142,16 @@ function disconnectingEvent(io, socket) {
     io.to(getUserGameRoom(socket)).emit("Leave room");
   })
 }
-function keydownEvent(io, socket) {
-  socket.on('keydown', data => {
-    io.to(Object.keys(socket.rooms)[0]).emit("keydown", data);
+function setupKeyChangeEvents(io,socket,key){
+  socket.on(key, data => {
+    io.to(Object.keys(socket.rooms)[0]).emit(key, data);
   })
 }
+function keydownEvent(io, socket) {
+  setupKeyChangeEvents(io,socket,"keydown")
+}
 function keyupEvent(io, socket) {
-
-  socket.on('keyup', data => {
-    io.to(Object.keys(socket.rooms)[0]).emit("keyup", data);
-  })
+  setupKeyChangeEvents(io,socket,"keyup")
 }
 export const init = server => {
   const io = socketio.listen(server);
