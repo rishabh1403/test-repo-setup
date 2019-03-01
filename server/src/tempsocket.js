@@ -48,7 +48,7 @@ function joinRoomEvent(io, socket) {
     io.to(room).emit("Joined room", io.sockets.adapter.rooms[room]); // get everyone in room
   });
 }
-function addNewFood(room) {
+function getEmptyCells(room){
   var empty = [];
   for (var x = 0; x < gameData[room].grid.width; x++) {
     for (var y = 0; y < gameData[room].grid.height; y++) {
@@ -57,7 +57,11 @@ function addNewFood(room) {
       }
     }
   }
-
+  return empty;
+}
+function addNewFood(room) {
+  
+  let empty = getEmptyCells(room);
   var randpos = empty[Math.floor(Math.random() * empty.length)];
   gameData[room].grid.set(FOOD, randpos.x, randpos.y);
 }
