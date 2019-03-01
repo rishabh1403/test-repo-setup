@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 import socketio from 'socket.io';
 import { gameConstants } from './utils/contants';
 const {
@@ -49,14 +48,18 @@ function joinRoomEvent(io, socket) {
   });
 }
 function getEmptyCells(room) {
-  let empty = new Array(gameData[room].grid.width).fill()
-    .reduce((acc,el,x) => {
-      let newRow = new Array(gameData[room].grid.height).fill()
-      .reduce((acc,el,y) => {
-        return [...acc,{x,y}];
-      },[])
-      return [...acc, ...newRow];
-    },[])
+  
+  const empty = new Array(gameData[room].grid.width).fill()
+    .reduce((acc, el, x) => {
+      const newRow = new Array(gameData[room].grid.height).fill()
+        .reduce((acc, el, y) => {
+          if (gameData[room].grid.get(x, y) === EMPTY) {
+          return [...acc, { x, y }];
+          }
+          return [...acc];
+        }, [])
+      return [...acc, ...newRow]
+    }, [])
   return empty;
 }
 function addNewFood(room) {
