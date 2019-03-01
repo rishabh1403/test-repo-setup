@@ -56,18 +56,15 @@ function joinRoomEvent(io, socket) {
 }
 
 function getEmptyCells(room) {
-  
-  const empty = new Array(gameData[room].grid.width).fill()
-    .reduce((acc, el, x) => {
-      const newRow = new Array(gameData[room].grid.height).fill()
-        .reduce((acc, el, y) => {
-          if (gameData[room].grid.get(x, y) === EMPTY) {
-          return [...acc, { x, y }];
-          }
-          return [...acc];
-        }, [])
-      return [...acc, ...newRow]
-    }, [])
+
+  const empty = [];
+  for (let x = 0; x < gameData[room].grid.width; x += 1) {
+    for (let y = 0; y < gameData[room].grid.height; y += 1) {
+      if (gameData[room].grid.get(x, y) === EMPTY) {
+        empty.push({ x, y });
+      }
+    }
+  }
   return empty;
 }
 
