@@ -54,18 +54,7 @@ export const init = server => {
         gameData[data].snake2.init(LEFT, sp.x, sp.y, socketIDs[1]);
         gameData[data].grid.set(SNAKE, sp.x, sp.y);
 
-        var empty = [];
-
-        for (var x = 0; x < gameData[data].grid.width; x++) {
-          for (var y = 0; y < gameData[data].grid.height; y++) {
-            if (gameData[data].grid.get(x, y) === EMPTY) {
-              empty.push({ x: x, y: y })
-            }
-          }
-        }
-
-        var randpos = empty[Math.floor(Math.random() * empty.length)];
-        gameData[data].grid.set(FOOD, randpos.x, randpos.y);
+        addNewFood(data);
       }
 
       gameData[data].initDone++;
@@ -95,38 +84,10 @@ export const init = server => {
         return socket.emit("gameOver");
       }
 
-      let tail = null, tail1 = null;
+      // let tail = null, tail1 = null;
 
-      if (isNewPositionFood(nx, ny, gameData[data])) {
-        gameData[data].score++;
-        tail = { x: nx, y: ny }
-        // setting food
-
-        addNewFood(data);
-
-      } else {
-        tail = gameData[data].snake.remove();
-        gameData[data].grid.set(EMPTY, tail.x, tail.y);
-        tail.x = nx;
-        tail.y = ny;
-      }
-
-      if (isNewPositionFood(nx1, ny1, gameData[data])) {
-        gameData[data].score++;
-        tail1 = { x: nx1, y: ny1 }
-        // setting food
-
-        
-        addNewFood(data);
-
-
-      } else {
-        tail1 = gameData[data].snake2.remove();
-        gameData[data].grid.set(EMPTY, tail1.x, tail1.y);
-
-        tail1.x = nx1;
-        tail1.y = ny1;
-      }
+      let tail = getTail(data, nx, ny, 'snake')
+      let tail1 = getTail(data, nx1, ny1, 'snake2')
 
       addTail(data, tail, tail1);
 
@@ -148,6 +109,23 @@ export const init = server => {
     })
   });
 
+}
+function getTail(data, nx, ny, snake) {
+  let tail = null;
+  if (isNewPositionFood(nx, ny, gameData[data])) {
+    gameData[data].score++;
+    tail = { x: nx, y: ny }
+    // setting food
+
+    addNewFood(data);
+
+  } else {
+    tail = gameData[data][snake].remove();
+    gameData[data].grid.set(EMPTY, tail.x, tail.y);
+    tail.x = nx;
+    tail.y = ny;
+  }
+  return tail;
 }
 function addNewFood(data) {
   var empty = [];
