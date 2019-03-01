@@ -124,7 +124,6 @@ function changeDirectionEvent(socket) {
     } else {
       gameData[room].opponentSnake.direction = direction;
     }
-
   })
 }
 
