@@ -1,6 +1,8 @@
-/* eslint-disable */
 import socketio from 'socket.io';
 import { gameConstants } from '../utils/contants';
+import Grid from './Grid';
+import Snake from './Snake';
+
 const {
   ROWS,
   COLS,
@@ -11,115 +13,8 @@ const {
   UP,
   RIGHT,
   DOWN,
-  KEY_LEFT,
-  KEY_UP,
-  KEY_RIGHT,
-  KEY_DOWN,
 } = gameConstants;
-import Grid from './Grid';
-import Snake from './Snake';
 const gameData = {};
-
-export const init = server => {
-  const io = socketio.listen(server);
-  setupEvents(io);
-}
-
-function setupEvents(io) {
-  io.on('connection', (socket) => {
-    connectedEvent(socket);
-    joinRoomEvent(io, socket);
-    initEvent(io, socket);
-    changeDirectionEvent(socket);
-    updateGameEvent(socket);
-    disconnectingEvent(io, socket);
-    keydownEvent(io, socket);
-    keyupEvent(io, socket);
-  });
-}
-
-// events
-function connectedEvent(socket) {
-  socket.emit('connected', "Hey");
-}
-
-function joinRoomEvent(io, socket) {
-  socket.on("joinRoom", (room) => {
-
-    console.log(room);
-    socket.join(room);
-
-    console.log(io.sockets.adapter.rooms[room])
-    if (io.sockets.adapter.rooms[room].length === 1) {
-      initGame(room);
-    }
-    io.to(room).emit("Joined room", io.sockets.adapter.rooms[room]); // get everyone in room
-  });
-}
-
-function initEvent(io, socket) {
-  socket.on("init", () => {
-    let room = getUserGameRoom(socket);
-    gameData[room].score = 0;
-    if (io.sockets.adapter.rooms[room].length === 2) {
-      let socketIDs = Object.keys(io.sockets.adapter.rooms[room].sockets);
-      putSnakes(socketIDs, room);
-      addNewFood(room);
-    }
-    gameData[room].initDone++;
-    console.log("init fired");
-  })
-}
-
-function changeDirectionEvent(socket) {
-
-  socket.on('changeDirection', (direction) => {
-    let room = getUserGameRoom(socket);
-    if (socket.id === gameData[room].snake.id) {
-      gameData[room].snake.direction = direction;
-    } else {
-      gameData[room].opponentSnake.direction = direction;
-    }
-  })
-}
-
-function updateGameEvent(socket) {
-  socket.on('updateGame', () => {
-    let room = getUserGameRoom(socket);
-    let snakeNewPosition = getNewSnakePosition(gameData[room].snake);
-    let opponentSnakeNewPosition = getNewSnakePosition(gameData[room].opponentSnake);
-    if (isGameOver(snakeNewPosition, opponentSnakeNewPosition, gameData[room])) {
-      gameData[room].initDone = 0;
-      return socket.emit("gameOver");
-    }
-    let tail = getTail(room, snakeNewPosition, 'snake')
-    let opponentSnakeTail = getTail(room, opponentSnakeNewPosition, 'opponentSnake')
-
-    addTail(room, tail, opponentSnakeTail);
-
-    socket.emit("draw", gameData[room].grid.grid);
-  })
-}
-
-function disconnectingEvent(io, socket) {
-  socket.on('disconnecting', () => {
-    io.to(getUserGameRoom(socket)).emit("Leave room");
-  })
-}
-
-function setupKeyChangeEvents(io, socket, key) {
-  socket.on(key, data => {
-    io.to(Object.keys(socket.rooms)[0]).emit(key, data);
-  })
-}
-
-function keydownEvent(io, socket) {
-  setupKeyChangeEvents(io, socket, "keydown")
-}
-
-function keyupEvent(io, socket) {
-  setupKeyChangeEvents(io, socket, "keyup")
-}
 
 // helper functions
 function getUserGameRoom(socket) {
@@ -149,15 +44,15 @@ function getEmptyCells(room) {
 
 function addNewFood(room) {
 
-  let empty = getEmptyCells(room);
-  var randpos = empty[Math.floor(Math.random() * empty.length)];
+  const empty = getEmptyCells(room);
+  const randpos = empty[Math.floor(Math.random() * empty.length)];
   gameData[room].grid.set(FOOD, randpos.x, randpos.y);
 }
 
 function putSnakes(socketIDs, room) {
   gameData[room].grid.init(EMPTY, COLS, ROWS);
 
-  var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
+  let sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
   gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0]);
   gameData[room].grid.set(SNAKE, sp.x, sp.y);
 
@@ -165,11 +60,14 @@ function putSnakes(socketIDs, room) {
   gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1]);
   gameData[room].grid.set(SNAKE, sp.x, sp.y);
 }
+function isNewPositionFood(snakeNewPositionX, snakeNewPositionY, state) {
+  return state.grid.get(snakeNewPositionX, snakeNewPositionY) === FOOD;
+}
 
 function getTail(room, snakeNewPosition, snake) {
   let tail = null;
   if (isNewPositionFood(snakeNewPosition.x, snakeNewPosition.y, gameData[room])) {
-    gameData[room].score++;
+    gameData[room].score += 1;
     tail = { x: snakeNewPosition.x, y: snakeNewPosition.y }
     addNewFood(room);
   } else {
@@ -187,42 +85,143 @@ function addTail(room, tail, opponentSnakeTail) {
   gameData[room].opponentSnake.insert(opponentSnakeTail.x, opponentSnakeTail.y);
 }
 
-function isNewPositionFood(snakeNewPositionX, snakeNewPositionY, gameData) {
-  return gameData.grid.get(snakeNewPositionX, snakeNewPositionY) === FOOD;
-}
 
 function getNewSnakePosition(snake) {
-  var x = snake.last.x;
-  var y = snake.last.y;
+  let { last: { x }, last: { y } } = snake;
   switch (snake.direction) {
     case LEFT:
-      x--
+      x -= 1;
       break;
     case UP:
-      y--;
+      y -= 1;
       break;
     case RIGHT:
-      x++;
+      x += 1;
       break;
     case DOWN:
-      y++;
+      y += 1;
+      break;
+    default:
       break;
   }
   return { x, y };
 }
 
-function isNewPositionBorder(snakeNewPositionX, snakeNewPositionY, gameData) {
-  return 0 > snakeNewPositionX || snakeNewPositionX > gameData.grid.width - 1 ||
-    0 > snakeNewPositionY || snakeNewPositionY > gameData.grid.height - 1;
+function isNewPositionBorder(snakeNewPositionX, snakeNewPositionY, state) {
+  return snakeNewPositionX < 0 || snakeNewPositionX > state.grid.width - 1 ||
+    snakeNewPositionY < 0 || snakeNewPositionY > state.grid.height - 1;
 }
 
-function isNewPositionSnake(snakeNewPositionX, snakeNewPositionY, gameData) {
-  return gameData.grid.get(snakeNewPositionX, snakeNewPositionY) === SNAKE;
+function isNewPositionSnake(snakeNewPositionX, snakeNewPositionY, state) {
+  return state.grid.get(snakeNewPositionX, snakeNewPositionY) === SNAKE;
 }
 
-function isGameOver(snakeNewPosition, opponentSnakeNewPosition, gameData) {
-  return isNewPositionBorder(snakeNewPosition.x, snakeNewPosition.y, gameData) ||
-    isNewPositionSnake(snakeNewPosition.x, snakeNewPosition.y, gameData) ||
-    isNewPositionBorder(opponentSnakeNewPosition.x, opponentSnakeNewPosition.y, gameData) ||
-    isNewPositionSnake(opponentSnakeNewPosition.x, opponentSnakeNewPosition.y, gameData);
+function isGameOver(snakeNewPosition, opponentSnakeNewPosition, state) {
+  return isNewPositionBorder(snakeNewPosition.x, snakeNewPosition.y, state) ||
+    isNewPositionSnake(snakeNewPosition.x, snakeNewPosition.y, state) ||
+    isNewPositionBorder(opponentSnakeNewPosition.x, opponentSnakeNewPosition.y, state) ||
+    isNewPositionSnake(opponentSnakeNewPosition.x, opponentSnakeNewPosition.y, state);
 }
+
+
+// events
+function connectedEvent(socket) {
+  socket.emit('connected', "Hey");
+}
+
+function joinRoomEvent(io, socket) {
+  socket.on("joinRoom", (room) => {
+
+    console.log(room);
+    socket.join(room);
+
+    console.log(io.sockets.adapter.rooms[room])
+    if (io.sockets.adapter.rooms[room].length === 1) {
+      initGame(room);
+    }
+    io.to(room).emit("Joined room", io.sockets.adapter.rooms[room]); // get everyone in room
+  });
+}
+
+function initEvent(io, socket) {
+  socket.on("init", () => {
+    const room = getUserGameRoom(socket);
+    gameData[room].score = 0;
+    if (io.sockets.adapter.rooms[room].length === 2) {
+      const socketIDs = Object.keys(io.sockets.adapter.rooms[room].sockets);
+      putSnakes(socketIDs, room);
+      addNewFood(room);
+    }
+    gameData[room].initDone+=1;
+    console.log("init fired");
+  })
+}
+
+function changeDirectionEvent(socket) {
+
+  socket.on('changeDirection', (direction) => {
+    const room = getUserGameRoom(socket);
+    if (socket.id === gameData[room].snake.id) {
+      gameData[room].snake.direction = direction;
+    } else {
+      gameData[room].opponentSnake.direction = direction;
+    }
+  })
+}
+
+function updateGameEvent(socket) {
+  socket.on('updateGame', () => {
+    const room = getUserGameRoom(socket);
+    const snakeNewPosition = getNewSnakePosition(gameData[room].snake);
+    const opponentSnakeNewPosition = getNewSnakePosition(gameData[room].opponentSnake);
+    if (isGameOver(snakeNewPosition, opponentSnakeNewPosition, gameData[room])) {
+      gameData[room].initDone = 0;
+      return socket.emit("gameOver");
+    }
+    const tail = getTail(room, snakeNewPosition, 'snake')
+    const opponentSnakeTail = getTail(room, opponentSnakeNewPosition, 'opponentSnake')
+
+    addTail(room, tail, opponentSnakeTail);
+
+    return socket.emit("draw", gameData[room].grid.grid);
+  })
+}
+
+function disconnectingEvent(io, socket) {
+  socket.on('disconnecting', () => {
+    io.to(getUserGameRoom(socket)).emit("Leave room");
+  })
+}
+
+function setupKeyChangeEvents(io, socket, key) {
+  socket.on(key, data => {
+    io.to(Object.keys(socket.rooms)[0]).emit(key, data);
+  })
+}
+
+function keydownEvent(io, socket) {
+  setupKeyChangeEvents(io, socket, "keydown")
+}
+
+function keyupEvent(io, socket) {
+  setupKeyChangeEvents(io, socket, "keyup")
+}
+
+function setupEvents(io) {
+  io.on('connection', (socket) => {
+    connectedEvent(socket);
+    joinRoomEvent(io, socket);
+    initEvent(io, socket);
+    changeDirectionEvent(socket);
+    updateGameEvent(socket);
+    disconnectingEvent(io, socket);
+    keydownEvent(io, socket);
+    keyupEvent(io, socket);
+  });
+}
+
+function init(server) {
+  const io = socketio.listen(server);
+  setupEvents(io);
+}
+export default { init };
