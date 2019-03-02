@@ -25,20 +25,22 @@ export const init = server => {
   setupEvents(io);
 }
 
-function getUserGameRoom(socket) {
-  return Object.keys(socket.rooms)[1];
+function setupEvents(io) {
+  io.on('connection', (socket) => {
+    connectedEvent(socket);
+    joinRoomEvent(io, socket);
+    initEvent(io, socket);
+    changeDirectionEvent(socket);
+    updateGameEvent(socket);
+    disconnectingEvent(io, socket);
+    keydownEvent(io, socket);
+    keyupEvent(io, socket);
+  });
 }
 
+// events
 function connectedEvent(socket) {
   socket.emit('connected', "Hey");
-}
-
-function initGame(room) {
-  gameData[room] = {};
-  gameData[room].snake = new Snake();
-  gameData[room].opponentSnake = new Snake();
-  gameData[room].initDone = 0;
-  gameData[room].grid = new Grid();
 }
 
 function joinRoomEvent(io, socket) {
@@ -55,38 +57,6 @@ function joinRoomEvent(io, socket) {
   });
 }
 
-function getEmptyCells(room) {
-
-  const empty = [];
-  for (let x = 0; x < gameData[room].grid.width; x += 1) {
-    for (let y = 0; y < gameData[room].grid.height; y += 1) {
-      if (gameData[room].grid.get(x, y) === EMPTY) {
-        empty.push({ x, y });
-      }
-    }
-  }
-  return empty;
-}
-
-function addNewFood(room) {
-
-  let empty = getEmptyCells(room);
-  var randpos = empty[Math.floor(Math.random() * empty.length)];
-  gameData[room].grid.set(FOOD, randpos.x, randpos.y);
-}
-
-function putSnakes(socketIDs, room) {
-  gameData[room].grid.init(EMPTY, COLS, ROWS);
-
-  var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
-  gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0]);
-  gameData[room].grid.set(SNAKE, sp.x, sp.y);
-
-  sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
-  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1]);
-  gameData[room].grid.set(SNAKE, sp.x, sp.y);
-}
-
 function initEvent(io, socket) {
   socket.on("init", () => {
     let room = getUserGameRoom(socket);
@@ -98,21 +68,7 @@ function initEvent(io, socket) {
     }
     gameData[room].initDone++;
     console.log("init fired");
-    // console.log(gameData[data]);
   })
-}
-
-function setupEvents(io) {
-  io.on('connection', (socket) => {
-    connectedEvent(socket);
-    joinRoomEvent(io, socket);
-    initEvent(io, socket);
-    changeDirectionEvent(socket);
-    updateGameEvent(socket);
-    disconnectingEvent(io, socket);
-    keydownEvent(io, socket);
-    keyupEvent(io, socket);
-  });
 }
 
 function changeDirectionEvent(socket) {
@@ -163,6 +119,51 @@ function keydownEvent(io, socket) {
 
 function keyupEvent(io, socket) {
   setupKeyChangeEvents(io, socket, "keyup")
+}
+
+// helper functions
+function getUserGameRoom(socket) {
+  return Object.keys(socket.rooms)[1];
+}
+
+function initGame(room) {
+  gameData[room] = {};
+  gameData[room].snake = new Snake();
+  gameData[room].opponentSnake = new Snake();
+  gameData[room].initDone = 0;
+  gameData[room].grid = new Grid();
+}
+
+function getEmptyCells(room) {
+
+  const empty = [];
+  for (let x = 0; x < gameData[room].grid.width; x += 1) {
+    for (let y = 0; y < gameData[room].grid.height; y += 1) {
+      if (gameData[room].grid.get(x, y) === EMPTY) {
+        empty.push({ x, y });
+      }
+    }
+  }
+  return empty;
+}
+
+function addNewFood(room) {
+
+  let empty = getEmptyCells(room);
+  var randpos = empty[Math.floor(Math.random() * empty.length)];
+  gameData[room].grid.set(FOOD, randpos.x, randpos.y);
+}
+
+function putSnakes(socketIDs, room) {
+  gameData[room].grid.init(EMPTY, COLS, ROWS);
+
+  var sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
+  gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0]);
+  gameData[room].grid.set(SNAKE, sp.x, sp.y);
+
+  sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
+  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1]);
+  gameData[room].grid.set(SNAKE, sp.x, sp.y);
 }
 
 function getTail(room, snakeNewPosition, snake) {
