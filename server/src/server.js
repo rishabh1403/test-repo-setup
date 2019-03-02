@@ -2,7 +2,7 @@ import express from 'express';
 import { json, urlencoded } from 'body-parser';
 import cors from 'cors';
 import http from 'http';
-import * as socket from './gameEngine/socket';
+import socket from './gameEngine/socket';
 import { serverPort } from './config';
 import { connectDb, disconnectDb } from './config/db';
 import setupRoutes from './routes';
