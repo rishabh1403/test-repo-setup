@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { signup, signin, validateEmailAccount } from '../controllers/auth.controller';
+import { signup, signin, forgetPassword } from '../controllers/auth.controller';
 
 const router = Router();
 
 router.post('/signup', signup);
 router.post('/signin', signin);
-router.get('/token/:token', validateEmailAccount);
+router.post('/forgetPassword', forgetPassword);
 
 export default router;

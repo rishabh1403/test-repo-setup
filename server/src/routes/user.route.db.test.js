@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { startServer } from '../server';
-import { httpStatuses } from '../utils/constants';
+import { httpMethods, httpStatuses } from '../utils/constants';
 import { getServerBaseUrlWith } from '../utils/functions';
 import { users, populateUsers, emptyUsers } from '../utils/seed';
 
@@ -17,14 +17,13 @@ beforeEach(async () => {
 afterEach(emptyUsers);
 
 describe(`GET '/api/me'`, () => {
+  // Todo: what if user inactive
   it('should return user if authenticated', async () => {
     expect.assertions(3);
-    const urlValidateUserEmailAccount = getServerBaseUrlWith(`/auth/token/${User1SignupToken}`);
-    const resValidateUser = await fetch(urlValidateUserEmailAccount);
     const url = getServerBaseUrlWith('/api/me');
     const res = await fetch(url, {
       headers: {
-        'x-auth': resValidateUser.headers.get('x-auth'),
+        'x-auth': User1SignupToken,
       },
     });
     expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
@@ -41,6 +40,74 @@ describe(`GET '/api/me'`, () => {
       },
     });
     expect(res.status).toBe(httpStatuses.UNAUTHORIZED_401);
+    const responseJson = await res.json();
+    expect(responseJson.error).toBeDefined();
+  });
+});
+
+describe('PUT /api/me/activateUser', () => {
+  it('should validate user email account if token correct', async () => {
+    expect.assertions(2);
+    const url = getServerBaseUrlWith(`/api/me/activateUser`);
+    const res = await fetch(url, {
+      method: httpMethods.put,
+      headers: {
+        'x-auth': User1SignupToken,
+      },
+    });
+    expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
+    const responseJson = await res.json();
+    expect(responseJson.user).toBeDefined();
+  });
+  it('should not validate user email account if token incorrect', async () => {
+    expect.assertions(2);
+    const url = getServerBaseUrlWith(`/api/me/activateUser`);
+    const res = await fetch(url, {
+      method: httpMethods.put,
+      headers: {
+        'x-auth': 'xyz',
+      },
+    });
+    expect(res.status).toBe(httpStatuses.UNAUTHORIZED_401);
+    const responseJson = await res.json();
+    expect(responseJson.error).toBeDefined();
+  });
+});
+
+describe('PUT /api/me/resetPassword', () => {
+  it('should reset password if password valid', async () => {
+    expect.assertions(2);
+    const url = getServerBaseUrlWith(`/api/me/resetPassword`);
+    const body = {
+      password: '1234ABCD',
+    };
+    const res = await fetch(url, {
+      method: httpMethods.put,
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth': User1SignupToken,
+      },
+    });
+    expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
+    const responseJson = await res.json();
+    expect(responseJson.message).toBeDefined();
+  });
+  it('should not reset password if password invalid', async () => {
+    expect.assertions(2);
+    const url = getServerBaseUrlWith(`/api/me/resetPassword`);
+    const body = {
+      password: '1234A',
+    };
+    const res = await fetch(url, {
+      method: httpMethods.put,
+      body: JSON.stringify(body),
+      headers: {
+        'Content-Type': 'application/json',
+        'x-auth': User1SignupToken,
+      },
+    });
+    expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
     const responseJson = await res.json();
     expect(responseJson.error).toBeDefined();
   });

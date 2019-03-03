@@ -5,14 +5,11 @@ dotenv.config();
 export const env = process.env.NODE_ENV || 'development';
 export const isDev = env === 'development' || env === 'dev';
 export const isTest = env === 'testing' || env === 'test';
-export const isProd = !isTest && !isDev;
+export const isStag = env === 'staging' || env === 'stag';
+export const isProd = env === 'production' || env === 'prod';
 const getServerPort = () => {
-  if (isTest) {
-    return process.env.TEST_ENV_PORT;
-  }
-  if (isDev) {
-    return process.env.DEV_ENV_PORT;
-  }
+  if (isTest) return process.env.TEST_ENV_PORT;
+  if (isDev) return process.env.DEV_ENV_PORT;
   return process.env.PORT;
 };
 export const serverPort = getServerPort();

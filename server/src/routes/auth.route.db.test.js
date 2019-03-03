@@ -11,10 +11,9 @@ beforeAll(async () => {
 });
 afterAll(() => server.close());
 
-let User1SignupToken;
 let User2SignupToken;
 beforeEach(async () => {
-  [User1SignupToken, User2SignupToken] = await populateUsers();
+  [, User2SignupToken] = await populateUsers();
 });
 afterEach(emptyUsers);
 
@@ -89,27 +88,8 @@ describe('POST /auth/signup', () => {
   });
 });
 
-describe('POST /auth/token/:token', () => {
-  it('should validate user email account if token correct', async () => {
-    expect.assertions(2);
-    const url = getServerBaseUrlWith(`/auth/token/${User1SignupToken}`);
-    const res = await fetch(url);
-    expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
-    const responseJson = await res.json();
-    expect(responseJson.user).toBeDefined();
-  });
-  it('should validate user email account if token incorrect', async () => {
-    expect.assertions(2);
-    const url = getServerBaseUrlWith(`/auth/token/lsdjfsldfjsdlkfnskdfoew`);
-    const res = await fetch(url);
-    expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
-    const responseJson = await res.json();
-    expect(responseJson.error).toBeDefined();
-  });
-});
-
 describe('POST /auth/signin', () => {
-  it('should not signin user if email account not validated', async () => {
+  it('should not signin user if user account is inactive', async () => {
     expect.assertions(2);
     const url = getServerBaseUrlWith('/auth/signin');
     const params = {
@@ -127,8 +107,13 @@ describe('POST /auth/signin', () => {
   });
   it('should signin user and return correct auth token', async () => {
     expect.assertions(4);
-    const urlValidateUserEmailAccount = getServerBaseUrlWith(`/auth/token/${User2SignupToken}`);
-    await fetch(urlValidateUserEmailAccount);
+    const urlActivateUser = getServerBaseUrlWith('/api/me/activateUser');
+    await fetch(urlActivateUser, {
+      method: httpMethods.put,
+      headers: {
+        'x-auth': User2SignupToken,
+      },
+    });
     const url = getServerBaseUrlWith('/auth/signin');
     const params = {
       email: users[1].email,
@@ -161,5 +146,42 @@ describe('POST /auth/signin', () => {
     });
     expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
     expect(res.headers.get('x-auth')).toBeNull();
+  });
+});
+
+describe('POST /auth/forgetPassword', () => {
+  it('find user in database and send a mail to reset password', async () => {
+    expect.assertions(2);
+    const url = getServerBaseUrlWith('/auth/forgetPassword');
+    const params = {
+      email: users[1].email,
+    };
+    const res = await fetch(url, {
+      method: httpMethods.post,
+      body: JSON.stringify(params),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
+    const responseJson = await res.json();
+    expect(responseJson.message).toBeDefined();
+  });
+  it('return error if no user exist with given email', async () => {
+    expect.assertions(2);
+    const url = getServerBaseUrlWith('/auth/forgetPassword');
+    const params = {
+      email: 'a@b.com',
+    };
+    const res = await fetch(url, {
+      method: httpMethods.post,
+      body: JSON.stringify(params),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
+    const responseJson = await res.json();
+    expect(responseJson.error).toBeDefined();
   });
 });
