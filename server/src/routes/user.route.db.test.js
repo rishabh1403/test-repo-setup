@@ -1,35 +1,27 @@
 import fetch from 'node-fetch';
 import { startServer } from '../server';
+import { httpStatuses } from '../utils/constants';
+import { getServerBaseUrlWith } from '../utils/functions';
 import { users, populateUsers, emptyUsers } from '../utils/seed';
-import { httpStatuses } from '../utils/contants';
 
 let server;
-let baseURL;
-let generateUrl;
 beforeAll(async () => {
-  server = await startServer({ port: 8798 });
-  baseURL = `http://localhost:${server.address().port}`;
-  generateUrl = (baseUrl => addUrl => {
-    const fullUrl = `${baseUrl}${addUrl}`;
-    return fullUrl;
-  })(baseURL);
+  server = await startServer();
 });
-
 afterAll(() => server.close());
 
 let User1SignupToken;
 beforeEach(async () => {
-  const [result0] = await populateUsers();
-  User1SignupToken = result0;
+  [User1SignupToken] = await populateUsers();
 });
-
 afterEach(emptyUsers);
+
 describe(`GET '/api/me'`, () => {
   it('should return user if authenticated', async () => {
     expect.assertions(3);
-    const urlValidateUserEmailAccount = generateUrl(`/auth/token/${User1SignupToken}`);
+    const urlValidateUserEmailAccount = getServerBaseUrlWith(`/auth/token/${User1SignupToken}`);
     const resValidateUser = await fetch(urlValidateUserEmailAccount);
-    const url = generateUrl('/api/me');
+    const url = getServerBaseUrlWith('/api/me');
     const res = await fetch(url, {
       headers: {
         'x-auth': resValidateUser.headers.get('x-auth'),
@@ -42,7 +34,7 @@ describe(`GET '/api/me'`, () => {
   });
   it('should return 401 if not authenticated', async () => {
     expect.assertions(2);
-    const url = generateUrl('/api/me');
+    const url = getServerBaseUrlWith('/api/me');
     const res = await fetch(url, {
       headers: {
         'x-auth': '',

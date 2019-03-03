@@ -1,37 +1,27 @@
 import fetch from 'node-fetch';
 import { startServer } from '../server';
+import User from '../models/user.model';
+import { httpMethods, httpStatuses } from '../utils/constants';
+import { getServerBaseUrlWith } from '../utils/functions';
 import { users, populateUsers, emptyUsers } from '../utils/seed';
-import User from '../models/user';
-import { httpMethods, httpStatuses } from '../utils/contants';
 
 let server;
-let baseURL;
-let generateUrl;
 beforeAll(async () => {
-  server = await startServer({ port: 8788 });
-  baseURL = `http://localhost:${server.address().port}`;
-  generateUrl = (baseUrl => addUrl => {
-    const fullUrl = `${baseUrl}${addUrl}`;
-    return fullUrl;
-  })(baseURL);
+  server = await startServer();
 });
-
 afterAll(() => server.close());
 
 let User1SignupToken;
 let User2SignupToken;
 beforeEach(async () => {
-  const [result0, result1] = await populateUsers();
-  User1SignupToken = result0;
-  User2SignupToken = result1;
+  [User1SignupToken, User2SignupToken] = await populateUsers();
 });
-
 afterEach(emptyUsers);
 
 describe('POST /auth/signup', () => {
   it('should create a user', async () => {
     expect.assertions(4);
-    const url = generateUrl('/auth/signup');
+    const url = getServerBaseUrlWith('/auth/signup');
     const params = {
       name: 'Ravi Example',
       email: 'ravi@example.com',
@@ -51,7 +41,7 @@ describe('POST /auth/signup', () => {
 
   it('should return validation errors if email invalid', async () => {
     expect.assertions(2);
-    const url = generateUrl('/auth/signup');
+    const url = getServerBaseUrlWith('/auth/signup');
     const params = {
       name: 'Ravi Example',
       email: 'xyz',
@@ -69,7 +59,7 @@ describe('POST /auth/signup', () => {
 
   it('should return validation errors if password invalid', async () => {
     expect.assertions(2);
-    const url = generateUrl('/auth/signup');
+    const url = getServerBaseUrlWith('/auth/signup');
     const params = {
       name: 'Ravi Example',
       email: 'ravi@example.com',
@@ -87,7 +77,7 @@ describe('POST /auth/signup', () => {
 
   it('should not create user if email in use', async () => {
     expect.assertions(2);
-    const url = generateUrl('/auth/signup');
+    const url = getServerBaseUrlWith('/auth/signup');
     const res = await fetch(url, {
       method: httpMethods.post,
       body: JSON.stringify(users[0]),
@@ -102,7 +92,7 @@ describe('POST /auth/signup', () => {
 describe('POST /auth/token/:token', () => {
   it('should validate user email account if token correct', async () => {
     expect.assertions(2);
-    const url = generateUrl(`/auth/token/${User1SignupToken}`);
+    const url = getServerBaseUrlWith(`/auth/token/${User1SignupToken}`);
     const res = await fetch(url);
     expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
     const responseJson = await res.json();
@@ -110,7 +100,7 @@ describe('POST /auth/token/:token', () => {
   });
   it('should validate user email account if token incorrect', async () => {
     expect.assertions(2);
-    const url = generateUrl(`/auth/token/lsdjfsldfjsdlkfnskdfoew`);
+    const url = getServerBaseUrlWith(`/auth/token/lsdjfsldfjsdlkfnskdfoew`);
     const res = await fetch(url);
     expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
     const responseJson = await res.json();
@@ -121,7 +111,7 @@ describe('POST /auth/token/:token', () => {
 describe('POST /auth/signin', () => {
   it('should not signin user if email account not validated', async () => {
     expect.assertions(2);
-    const url = generateUrl('/auth/signin');
+    const url = getServerBaseUrlWith('/auth/signin');
     const params = {
       email: users[1].email,
       password: users[1].password,
@@ -137,9 +127,9 @@ describe('POST /auth/signin', () => {
   });
   it('should signin user and return correct auth token', async () => {
     expect.assertions(4);
-    const urlValidateUserEmailAccount = generateUrl(`/auth/token/${User2SignupToken}`);
+    const urlValidateUserEmailAccount = getServerBaseUrlWith(`/auth/token/${User2SignupToken}`);
     await fetch(urlValidateUserEmailAccount);
-    const url = generateUrl('/auth/signin');
+    const url = getServerBaseUrlWith('/auth/signin');
     const params = {
       email: users[1].email,
       password: users[1].password,
@@ -159,7 +149,7 @@ describe('POST /auth/signin', () => {
 
   it('should reject invalid signin', async () => {
     expect.assertions(2);
-    const url = generateUrl('/auth/signin');
+    const url = getServerBaseUrlWith('/auth/signin');
     const params = {
       email: users[1].email,
       password: `${users[1].password}1`,

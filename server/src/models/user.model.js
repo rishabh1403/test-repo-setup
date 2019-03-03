@@ -4,47 +4,54 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { secrets } from '../config';
 
-const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    trim: true,
-    required: true,
-  },
-  email: {
-    type: String,
-    trim: true,
-    required: true,
-    minlength: 1,
-    unique: true,
-    validate: {
-      validator: validator.isEmail,
-      message: '{VALUE} is not a valid email',
+const UserSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: true,
+      trim: true,
+      lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error(`${value} is not a valid email`);
+        }
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
+    active: {
+      type: Boolean,
+      default: false,
     },
   },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-  },
-  active: {
-    type: Boolean,
-    default: false,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 // instance methods
 // determines what to send back when mongoose model is converted to JSON
 UserSchema.methods.toJSON = function toJSON() {
   const user = this;
-  const { _id, name, email } = user.toObject();
-  return { _id, name, email };
+  const userObject = user.toObject();
+  delete userObject.password;
+  return userObject;
 };
 
 // generates Authentication token
 UserSchema.methods.generateToken = function generateToken() {
   const user = this;
   const { _id } = user;
-  const token = jwt.sign({ _id }, secrets.jwt, { expiresIn: secrets.jwtExp }).toString();
+  const token = jwt.sign({ _id: _id.toString() }, secrets.jwt, { expiresIn: secrets.jwtExp });
   return token;
 };
 

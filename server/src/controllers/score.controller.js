@@ -1,4 +1,4 @@
-import constants from '../utils/contants';
+import constants from '../utils/constants';
 import {
   queryScores,
   queryScoresCount,

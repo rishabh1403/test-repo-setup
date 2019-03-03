@@ -1,5 +1,5 @@
-import User from '../models/user';
-import { httpStatuses } from '../utils/contants';
+import User from '../models/user.model';
+import { httpStatuses } from '../utils/constants';
 
 const authenticate = async (req, res, next) => {
   const token = req.header('x-auth');

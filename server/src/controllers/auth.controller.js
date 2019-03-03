@@ -1,7 +1,7 @@
-import User from '../models/user';
-import Mailer from '../config/mailer';
-import { serverPort, isTest } from '../config/index';
-import { httpStatuses } from '../utils/contants';
+import User from '../models/user.model';
+import { sendWelcomeEmailWithToken } from '../config/mailer';
+import { isTest } from '../config/index';
+import { httpStatuses } from '../utils/constants';
 
 export const signup = async (req, res) => {
   try {
@@ -9,18 +9,8 @@ export const signup = async (req, res) => {
     const user = await User.createUser({ name, email, password });
     const token = user.generateToken();
     if (!isTest) {
-      try {
-        const msg = {
-          to: email,
-          from: 'adityasmksaxena@gmail.com',
-          subject: 'Sneaky Snakes Account Email Verification',
-          text: `Hi ${name},`,
-          html: `<p>Click on <a href="http://localhost:${serverPort}/auth/token/${token}">this link</a> to verify email account</ br></p>`,
-        };
-        await Mailer.send(msg);
-      } catch (error) {
-        throw new Error('error sending verification mail');
-      }
+      const mailTo = email;
+      sendWelcomeEmailWithToken({ token, mailTo });
     }
     const successMessage = 'Please verify your mail address and signin';
     return res.status(httpStatuses.CREATED_201).send({ message: successMessage });

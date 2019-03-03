@@ -1,6 +1,6 @@
-import authRouter from './auth';
+import authRouter from './auth.route';
 import authenticate from '../middleware/authenticate';
-import userRouter from './user';
+import userRouter from './user.route';
 import scoreRouter from './score.route';
 
 const setupRoutes = app => {
