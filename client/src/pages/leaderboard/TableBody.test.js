@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { Label, Table } from 'semantic-ui-react';
+import { Table } from 'semantic-ui-react';
 import TableBody from './TableBody';
 
 describe('<TableBody />', () => {
@@ -14,9 +14,5 @@ describe('<TableBody />', () => {
 
   it('should render 3 <Table.Cell /> for each Row', () => {
     expect(wrapper.find(Table.Cell).length).toBe(rowCount * cellPerRowCount);
-  });
-
-  it('should render <Label /> for First Username', () => {
-    expect(wrapper.find(Label).length).toBe(1);
   });
 });

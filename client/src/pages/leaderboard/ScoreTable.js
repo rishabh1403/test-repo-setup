@@ -4,7 +4,7 @@ import { Table } from 'semantic-ui-react';
 import TableFooter from './TableFooter';
 import TableBody from './TableBody';
 
-const ScoreTable = ({ users, pageCount }) => (
+const ScoreTable = ({ users, ...props }) => (
   <Table celled size="large" color="teal" unstackable fixed>
     <Table.Header>
       <Table.Row>
@@ -17,7 +17,7 @@ const ScoreTable = ({ users, pageCount }) => (
       <TableBody {...{ users }} />
     </Table.Body>
     <Table.Footer>
-      <TableFooter {...{ pageCount }} />
+      <TableFooter {...props} />
     </Table.Footer>
   </Table>
 );
@@ -28,7 +28,6 @@ ScoreTable.defaultProps = {
 
 ScoreTable.propTypes = {
   users: PropTypes.arrayOf(PropTypes.object),
-  pageCount: PropTypes.number.isRequired,
 };
 
 export default ScoreTable;

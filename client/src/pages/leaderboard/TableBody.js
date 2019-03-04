@@ -1,21 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Label, Table } from 'semantic-ui-react';
+import { Table } from 'semantic-ui-react';
 import getUniqueKey from '../../utils/unique_key';
-
-// To style the Top Scorer's name
-const getUserNameStyle = (index, name) => (index === 0 ? (
-  <Label size="large" color="orange" tag>
-    {name}
-  </Label>
-) : (
-  name
-));
 
 const TableBody = ({ users }) => {
   let firstTenUsers = users;
   const LIST_LENGTH = 10;
-
   // If users array length is less than required, fill it with empty string
   if (users.length <= LIST_LENGTH) {
     const emptyLength = LIST_LENGTH - users.length;
@@ -27,10 +17,10 @@ const TableBody = ({ users }) => {
     firstTenUsers = [...users, ...emptyUsersArray];
   }
 
-  return firstTenUsers.map((user, index) => (
+  return firstTenUsers.map(user => (
     <Table.Row key={getUniqueKey(user)}>
       <Table.Cell textAlign="center">{user.rank}</Table.Cell>
-      <Table.Cell textAlign="center">{getUserNameStyle(index, user.name)}</Table.Cell>
+      <Table.Cell textAlign="center">{user.name}</Table.Cell>
       <Table.Cell textAlign="center">{user.score}</Table.Cell>
     </Table.Row>
   ));

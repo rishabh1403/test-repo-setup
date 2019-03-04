@@ -1,40 +1,98 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import {
   Grid, GridColumn, GridRow, Header,
 } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import ScoreTable from './ScoreTable';
+import {
+  getUsersAndPageCount,
+  getPersonalScore,
+  getPersonalRank,
+} from '../../utils/leaderboard_api';
 
-const users = [
-  { name: 'first', score: 40, rank: 1 },
-  { name: 'second', score: 30, rank: 2 },
-  { name: 'third', score: 20, rank: 3 },
-];
+const Leaderboard = ({ userId }) => {
+  const [users, setUsers] = useState([]);
+  const [pageCount, setPageCount] = useState(1);
+  const [personalScore, setPersonalScore] = useState('loading...');
+  const [personalRank, setPersonalRank] = useState('loading...');
+  const [currentPage, setPage] = useState(1);
+  const [backNavigation, setBackNavigation] = useState(true);
+  const [forwardNavigation, setForwardNavigation] = useState(true);
 
-const pageCount = 5;
+  const updateList = async () => {
+    const [fetchedUsers, fetchedPageCount] = await getUsersAndPageCount({ currentPage });
+    setUsers(fetchedUsers);
+    setPageCount(fetchedPageCount);
+  };
 
-const Leaderboard = () => (
-  <div className="leaderboard">
-    <Grid centered padded columns={1}>
-      <GridColumn computer={6} tablet={8} mobile={14}>
-        <Grid divided>
-          <GridRow centered>
-            <Header textAlign="center" as="h1">
-              Leaderboard
-            </Header>
-          </GridRow>
-          <GridRow>
-            <ScoreTable {...{ users, pageCount }} />
-          </GridRow>
-          <GridRow centered>
-            <Header textAlign="center" as="h1">
-              Your High Score: 40
-            </Header>
-          </GridRow>
-        </Grid>
-      </GridColumn>
-    </Grid>
-  </div>
-);
+  const getPageInfo = async () => {
+    const score = await getPersonalScore({ userId });
+    setPersonalScore(score);
+    const rank = await getPersonalRank({ userId });
+    setPersonalRank(rank);
+  };
+
+  // Runs on Mount & Page change
+  useEffect(() => {
+    updateList();
+  }, [currentPage]);
+
+  // Runs on Mount
+  useEffect(() => {
+    getPageInfo();
+  }, []);
+
+  // Runs after every update to enable or disable navigation buttons
+  useEffect(() => {
+    if (currentPage === pageCount) {
+      setForwardNavigation(false);
+    } else {
+      setForwardNavigation(true);
+    }
+    if (currentPage === 1) {
+      setBackNavigation(false);
+    } else {
+      setBackNavigation(true);
+    }
+  });
+
+  return (
+    <div className="leaderboard">
+      <Grid centered padded columns={1}>
+        <GridColumn computer={6} tablet={8} mobile={14}>
+          <Grid divided>
+            <GridRow centered>
+              <Header textAlign="center" as="h1">
+                Leaderboard
+              </Header>
+            </GridRow>
+            <GridRow>
+              <ScoreTable
+                {...{
+                  users,
+                  pageCount,
+                  backNavigation,
+                  forwardNavigation,
+                  currentPage,
+                  setPage,
+                }}
+              />
+            </GridRow>
+            <GridRow centered>
+              <Header textAlign="center" as="h3">
+                {`You: High Score- ${personalScore} Rank- ${personalRank}`}
+              </Header>
+            </GridRow>
+          </Grid>
+        </GridColumn>
+      </Grid>
+    </div>
+  );
+};
+
+Leaderboard.propTypes = {
+  userId: PropTypes.string.isRequired,
+};
 
 export default Leaderboard;
