@@ -4,28 +4,6 @@ import React, { Component } from 'react';
 import './entry.css';
 
 
-
-
-
-class Snake {
-
-
-  init(d, x, y) {
-
-    this.direction = d;
-    this._queue = [];
-    this.insert(x, y);
-  }
-  insert(x, y) {
-    this._queue.unshift({ x: x, y: y });
-    this.last = this._queue[0];
-  }
-  remove() {
-    return this._queue.pop();
-  }
-}
-
-let snake = new Snake();
 // dimensions
 const ROWS = 26, COLS = 26;
 
@@ -43,6 +21,10 @@ let canvas, ctx, keystate, frames, score, animationLoop;
 
 class Game extends Component {
 
+  state = {
+    color : "#" + Math.random().toString(16).slice(2, 8),
+  }
+
   loop() {
     this.update();
     const loop = this.loop.bind(this);
@@ -53,36 +35,36 @@ class Game extends Component {
     const { socket } = this.props;
     frames++;
 
-    if (keystate[KEY_LEFT] && snake.direction !== RIGHT) {
+    if (keystate[KEY_LEFT]) {
       socket.emit("changeDirection", LEFT);
     }
-    if (keystate[KEY_UP] && snake.direction !== DOWN) {
+    if (keystate[KEY_UP]) {
       socket.emit("changeDirection", UP);
     }
-    if (keystate[KEY_RIGHT] && snake.direction !== LEFT) {
+    if (keystate[KEY_RIGHT]) {
       socket.emit("changeDirection", RIGHT);
     }
-    if (keystate[KEY_DOWN] && snake.direction !== UP) {
+    if (keystate[KEY_DOWN]) {
       socket.emit("changeDirection", DOWN);
     }
 
-    if (frames % 40 === 0) {
+    if (frames % 30 === 0) {
       socket.emit("updateGame");
     }
 
   }
-  draw(data) {
+  draw({grid,snakeColors}, id) {
     var tw = canvas.width / COLS;
     var th = canvas.height / ROWS;
 
     for (var x = 0; x < COLS; x++) {
       for (var y = 0; y < ROWS; y++) {
-        switch (data[x][y]) {
+        switch (grid[x][y]) {
           case EMPTY:
             ctx.fillStyle = "#fff";
             break;
           case SNAKE:
-            ctx.fillStyle = "#0ff";
+            ctx.fillStyle = snakeColors[id];
             break;
           case FOOD:
             ctx.fillStyle = "#f00";
@@ -116,7 +98,9 @@ class Game extends Component {
       socket.emit("init");
     })
     socket.on("draw", (data) => {
-      this.draw(data)
+      console.log(data);
+      console.log(socket.id);
+      this.draw(data, socket.id)
     })
     this.loop();
   }

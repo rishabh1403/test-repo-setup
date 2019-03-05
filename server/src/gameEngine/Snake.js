@@ -1,8 +1,9 @@
 export default class Snake {
-  init(d, x, y, id) {
+  init(d, x, y, id, color) {
     this.direction = d;
     this.queue = [];
     this.id = id;
+    this.color = color;
     this.insert(x, y);
   }
 
