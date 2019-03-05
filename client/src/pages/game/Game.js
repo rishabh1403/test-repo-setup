@@ -58,7 +58,9 @@ class Game extends Component {
   draw({ grid, snakeColors }, id) {
     var tw = canvas.width / COLS;
     var th = canvas.height / ROWS;
-
+    this.setState({
+      color: snakeColors[id],
+    })
     for (var x = 0; x < COLS; x++) {
       for (var y = 0; y < ROWS; y++) {
         switch (grid[x][y]) {
@@ -72,11 +74,14 @@ class Game extends Component {
             break;
           case FOOD:
             // ctx.fillStyle = "#f00";
-            ctx.drawImage(image,x * tw, y * th, tw, th);
+            ctx.drawImage(image, x * tw, y * th, tw, th);
             break;
           default:
             ctx.fillStyle = snakeColors[grid[x][y]];
             ctx.fillRect(x * tw, y * th, tw, th);
+            // ctx.beginPath();
+            // ctx.arc((x * tw) + (tw / 2), (y * th) + (th / 2), th / 2, 0, 1 * Math.PI);
+            // ctx.fill();
             break;
         }
         // ctx.fillRect(x * tw, y * th, tw, th);
@@ -120,6 +125,9 @@ class Game extends Component {
   render() {
     return (
       <div className="fix">
+        <div>
+          <div style={{ backgroundColor: this.state.color, width: 20, height: 20 }}></div>Your snake
+        </div>
       </div>
     );
   }
