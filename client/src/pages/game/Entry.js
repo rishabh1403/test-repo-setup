@@ -17,9 +17,6 @@ class Entry extends Component {
     }
   }
 
-  componentWillMount() {
-
-  }
   componentDidMount() {
     socket.on("connected", (data) => {
       socket.emit("joinRoom", "abcdef");
@@ -40,7 +37,7 @@ class Entry extends Component {
         start: false,
       })
     })
-    
+
   }
   render() {
     return (
