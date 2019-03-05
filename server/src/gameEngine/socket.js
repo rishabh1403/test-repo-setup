@@ -51,13 +51,14 @@ function addNewFood(room) {
 
 function putSnakes(socketIDs, room) {
   gameData[room].grid.init(EMPTY, COLS, ROWS);
-
+  const color1 = `#${Math.random().toString(16).slice(2, 8)}`;
+  const color2 = `#${Math.random().toString(16).slice(2, 8)}`;
   let sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
-  gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0]);
+  gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0], color1);
   gameData[room].grid.set(SNAKE, sp.x, sp.y);
 
   sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
-  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1]);
+  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1], color2);
   gameData[room].grid.set(SNAKE, sp.x, sp.y);
 }
 function isNewPositionFood(snakeNewPositionX, snakeNewPositionY, state) {
@@ -152,24 +153,35 @@ function initEvent(io, socket) {
       putSnakes(socketIDs, room);
       addNewFood(room);
     }
-    gameData[room].initDone+=1;
+    gameData[room].initDone += 1;
     console.log("init fired");
   })
 }
 
+function shouldChangeDirection(newDirection, oldDirection) {
+  return (newDirection === LEFT && oldDirection !== RIGHT) ||
+    (newDirection === RIGHT && oldDirection !== LEFT) ||
+    (newDirection === UP && oldDirection !== DOWN) ||
+    (newDirection === DOWN && oldDirection !== UP)
+}
 function changeDirectionEvent(socket) {
 
   socket.on('changeDirection', (direction) => {
     const room = getUserGameRoom(socket);
     if (socket.id === gameData[room].snake.id) {
-      gameData[room].snake.direction = direction;
+      if (shouldChangeDirection(direction, gameData[room].snake.direction)) {
+        gameData[room].snake.direction = direction;
+      }
     } else {
-      gameData[room].opponentSnake.direction = direction;
+      // eslint-disable-next-line
+      if (shouldChangeDirection(direction, gameData[room].opponentSnake.direction)) {
+        gameData[room].opponentSnake.direction = direction;
+      }
     }
   })
 }
 
-function updateGameEvent(socket) {
+function updateGameEvent(io,socket) {
   socket.on('updateGame', () => {
     const room = getUserGameRoom(socket);
     const snakeNewPosition = getNewSnakePosition(gameData[room].snake);
@@ -182,8 +194,15 @@ function updateGameEvent(socket) {
     const opponentSnakeTail = getTail(room, opponentSnakeNewPosition, 'opponentSnake')
 
     addTail(room, tail, opponentSnakeTail);
-
-    return socket.emit("draw", gameData[room].grid.grid);
+    const data = {
+      grid: gameData[room].grid.grid,
+      snakeColors : {
+        [gameData[room].snake.id] : gameData[room].snake.color,
+        [gameData[room].opponentSnake.id] : gameData[room].opponentSnake.color,
+      }
+    }
+    return io.to(getUserGameRoom(socket)).emit("draw", data);
+    // return socket.emit("draw", data);
   })
 }
 
@@ -193,30 +212,14 @@ function disconnectingEvent(io, socket) {
   })
 }
 
-function setupKeyChangeEvents(io, socket, key) {
-  socket.on(key, data => {
-    io.to(Object.keys(socket.rooms)[0]).emit(key, data);
-  })
-}
-
-function keydownEvent(io, socket) {
-  setupKeyChangeEvents(io, socket, "keydown")
-}
-
-function keyupEvent(io, socket) {
-  setupKeyChangeEvents(io, socket, "keyup")
-}
-
 function setupEvents(io) {
   io.on('connection', (socket) => {
     connectedEvent(socket);
     joinRoomEvent(io, socket);
     initEvent(io, socket);
     changeDirectionEvent(socket);
-    updateGameEvent(socket);
+    updateGameEvent(io,socket);
     disconnectingEvent(io, socket);
-    keydownEvent(io, socket);
-    keyupEvent(io, socket);
   });
 }
 
