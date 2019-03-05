@@ -16,3 +16,5 @@ export default class Snake {
     return this.queue.pop();
   }
 }
+
+// const socketIDs = Object.keys(io.sockets.adapter.rooms[room].sockets);

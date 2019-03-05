@@ -22,7 +22,7 @@ let canvas, ctx, keystate, frames, score, animationLoop;
 class Game extends Component {
 
   state = {
-    color : "#" + Math.random().toString(16).slice(2, 8),
+    color: "#" + Math.random().toString(16).slice(2, 8),
   }
 
   loop() {
@@ -53,7 +53,7 @@ class Game extends Component {
     }
 
   }
-  draw({grid,snakeColors}, id) {
+  draw({ grid, snakeColors }, id) {
     var tw = canvas.width / COLS;
     var th = canvas.height / ROWS;
 
@@ -63,11 +63,11 @@ class Game extends Component {
           case EMPTY:
             ctx.fillStyle = "#fff";
             break;
-          case SNAKE:
-            ctx.fillStyle = snakeColors[id];
-            break;
           case FOOD:
             ctx.fillStyle = "#f00";
+            break;
+          default:
+            ctx.fillStyle = snakeColors[grid[x][y]];
             break;
         }
         ctx.fillRect(x * tw, y * th, tw, th);
