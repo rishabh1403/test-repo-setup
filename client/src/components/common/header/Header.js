@@ -6,29 +6,23 @@ import './header.css';
 export default class Header extends Component {
   state = {
     activeItem: 'home',
-  }
+  };
 
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name })
+  handleItemClick = (e, { name }) => this.setState({ activeItem: name });
 
   render() {
     const { activeItem } = this.state;
     const { children } = this.props;
 
     return (
-      <React.Fragment>
+      <div className="main-container">
         <Menu size="massive" fixed="top">
-          <Menu.Item
-            name="home"
-            active={activeItem === 'home'}
-            onClick={this.handleItemClick}
-          >
+          <Menu.Item name="home" active={activeItem === 'home'} onClick={this.handleItemClick}>
             Sneaky Snakes
           </Menu.Item>
         </Menu>
-        <div className="container">
-          {children}
-        </div>
-      </React.Fragment>
+        <div className="container">{children}</div>
+      </div>
     );
   }
 }

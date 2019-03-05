@@ -1,3 +1,10 @@
-.container{
+.container {
   margin-top: 50px;
+  height: 100%;
+  width: 100%;
+}
+
+.main-container {
+  height: 90vh;
+  width: 100vw;
 }

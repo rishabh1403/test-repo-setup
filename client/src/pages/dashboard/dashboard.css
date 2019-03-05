@@ -1,7 +1,8 @@
-.home-container {
+.dashboard-container {
   display: grid;
+  position: absolute;
   width: 100%;
-  height: 100%;
+  height: 90%;
   align-content: center;
   justify-items: center;
 }

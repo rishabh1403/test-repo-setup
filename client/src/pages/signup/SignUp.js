@@ -12,7 +12,7 @@ import InputField from '../../components/common/InputFields/InputField';
 const SignUp = () => (
   <div className="signup-form">
     <Grid textAlign="center" style={{ height: '100%' }} verticalAlign="middle">
-      <Grid.Column style={{ maxWidth: 450 }}>
+      <Grid.Column style={{ width: 450 }}>
         <Header as="h2" color="teal" textAlign="center">
           Sign Up
         </Header>

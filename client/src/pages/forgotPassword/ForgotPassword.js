@@ -10,7 +10,7 @@ import StyledButton from '../../components/common/styledButton/StyledButton';
 const ForgotPassword = () => (
   <div className="password-reset-form">
     <Grid textAlign="center" style={{ height: '100%' }} verticalAlign="middle">
-      <Grid.Column style={{ maxWidth: 450 }}>
+      <Grid.Column style={{ width: 450 }}>
         <Header as="h2" color="teal" textAlign="center">
           Reset Password
         </Header>

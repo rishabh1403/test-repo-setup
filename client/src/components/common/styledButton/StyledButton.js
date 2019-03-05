@@ -4,19 +4,14 @@ import { Button } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 
 const StyledButton = ({
-  text, url, size, color, link, inverted, fluid,
+  url, link, text, ...props
 }) => {
   const buttonProps = {
-    text,
-    fluid,
-    size,
-    color,
     to: url,
-    inverted,
     as: link ? Link : Button,
   };
   return (
-    <Button {...buttonProps}>
+    <Button {...buttonProps} {...props}>
       {text}
     </Button>
   );
@@ -29,6 +24,7 @@ StyledButton.defaultProps = {
   link: false,
   fluid: false,
   inverted: false,
+  onClick: null,
 };
 
 StyledButton.propTypes = {
@@ -39,5 +35,6 @@ StyledButton.propTypes = {
   link: PropTypes.bool,
   fluid: PropTypes.bool,
   inverted: PropTypes.bool,
+  onClick: PropTypes.func,
 };
 export default StyledButton;

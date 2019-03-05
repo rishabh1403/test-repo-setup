@@ -1,0 +1,13 @@
+.modal-container {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  position: absolute;
+  width: 400px;
+  height: 300px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(66, 67, 68, 0.842);
+  box-shadow: 2px 20px 50px #0000003d;
+}

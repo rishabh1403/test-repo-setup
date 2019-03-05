@@ -6,6 +6,7 @@ import SignIn from './pages/signin/Signin';
 import SignUp from './pages/signup/SignUp';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import Header from './components/common/header/Header';
+import Dashboard from './pages/dashboard/Dashboard';
 import LeaderboardPage from './pages/leaderboard/Leaderboard';
 
 // It will be removed and userId will be passed as Props to Leaderboard component
@@ -19,6 +20,7 @@ const App = () => (
         <Route exact path="/signin" component={SignIn} />
         <Route exact path="/signup" component={SignUp} />
         <Route exact path="/forgotPassword" component={ForgotPassword} />
+        <Route exact path="/dashboard" component={Dashboard} />
         <Route
           exact
           path="/leaderboard"

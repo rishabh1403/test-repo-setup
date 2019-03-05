@@ -19,7 +19,7 @@ describe('<Home />', () => {
     expect(wrapper.find(Grid.Row).length).toBe(2);
   });
 
-  it('should render a five centered columns', () => {
-    expect(wrapper.find(CenterColumn).length).toBe(5);
+  it('should render a three centered columns', () => {
+    expect(wrapper.find(CenterColumn).length).toBe(3);
   });
 });
