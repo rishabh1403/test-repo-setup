@@ -7,6 +7,7 @@ import SignUp from './pages/signup/SignUp';
 import ForgotPassword from './pages/forgotPassword/ForgotPassword';
 import Header from './components/common/header/Header';
 import LeaderboardPage from './pages/leaderboard/Leaderboard';
+import Entry from './pages/game/Entry';
 
 const App = () => (
   <BrowserRouter>
@@ -17,6 +18,7 @@ const App = () => (
         <Route exact path="/signup" component={SignUp} />
         <Route exact path="/forgotPassword" component={ForgotPassword} />
         <Route exact path="/leaderboard" component={LeaderboardPage} />
+        <Route exact path="/game" component={Entry} />
         <Route exact path="*" component={Page404} />
       </Switch>
     </Header>
