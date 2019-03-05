@@ -7,7 +7,6 @@ const {
   ROWS,
   COLS,
   EMPTY,
-  SNAKE,
   FOOD,
   LEFT,
   UP,

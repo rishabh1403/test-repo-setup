@@ -2,8 +2,10 @@
 
 import React, { Component } from 'react';
 import './entry.css';
+import apple from './apple.png'
 
-
+const image = new Image();
+image.src = apple;
 // dimensions
 const ROWS = 26, COLS = 26;
 
@@ -61,16 +63,23 @@ class Game extends Component {
       for (var y = 0; y < ROWS; y++) {
         switch (grid[x][y]) {
           case EMPTY:
-            ctx.fillStyle = "#fff";
+            if ((x + y) % 2 === 0) {
+              ctx.fillStyle = "#8BE242";
+            } else {
+              ctx.fillStyle = "#93E84A";
+            }
+            ctx.fillRect(x * tw, y * th, tw, th);
             break;
           case FOOD:
-            ctx.fillStyle = "#f00";
+            // ctx.fillStyle = "#f00";
+            ctx.drawImage(image,x * tw, y * th, tw, th);
             break;
           default:
             ctx.fillStyle = snakeColors[grid[x][y]];
+            ctx.fillRect(x * tw, y * th, tw, th);
             break;
         }
-        ctx.fillRect(x * tw, y * th, tw, th);
+        // ctx.fillRect(x * tw, y * th, tw, th);
       }
     }
     ctx.fillStyle = "#000";
