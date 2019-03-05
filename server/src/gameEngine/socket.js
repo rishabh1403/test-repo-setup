@@ -50,14 +50,14 @@ function addNewFood(room) {
 
 function putSnakes(socketIDs, room) {
   gameData[room].grid.init(EMPTY, COLS, ROWS);
-  const color1 = `#${Math.random().toString(16).slice(2, 8)}`;
-  const color2 = `#${Math.random().toString(16).slice(2, 8)}`;
+  // const color1 = `#${Math.random().toString(16).slice(2, 8)}`;
+  // const color2 = `#${Math.random().toString(16).slice(2, 8)}`;
   let sp = { x: Math.floor(COLS / 2), y: ROWS - 1 }
-  gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0], color1);
+  gameData[room].snake.init(UP, sp.x, sp.y, socketIDs[0], '#191970');
   gameData[room].grid.set(socketIDs[0], sp.x, sp.y);
 
   sp = { x: COLS - 1, y: Math.floor(ROWS / 2) }
-  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1], color2);
+  gameData[room].opponentSnake.init(LEFT, sp.x, sp.y, socketIDs[1], '#8B4513');
   gameData[room].grid.set(socketIDs[1], sp.x, sp.y);
 }
 function isNewPositionFood(snakeNewPositionX, snakeNewPositionY, state) {
