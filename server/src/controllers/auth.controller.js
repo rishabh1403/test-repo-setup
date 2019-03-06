@@ -43,3 +43,15 @@ export const forgetPassword = async (req, res) => {
     return res.status(httpStatuses.BAD_REQUEST_400).send({ error: error.toString() });
   }
 };
+
+export const activateUser = async (req, res) => {
+  try {
+    const { token } = req.body;
+    const user = await User.findByToken(token);
+    user.active = true;
+    await user.save();
+    return res.send({ data: { message: 'email successfully verified' } });
+  } catch (error) {
+    return res.status(httpStatuses.BAD_REQUEST_400).send({ error: error.toString() });
+  }
+};

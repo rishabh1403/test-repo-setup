@@ -1,39 +1,40 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Form, Grid, Header, Message, Segment, Container } from 'semantic-ui-react';
-import EmailField from '../../components/common/InputFields/EmailField';
+import '../signin/signin.css';
+import { Link } from 'react-router-dom';
 import PasswordField from '../../components/common/InputFields/PasswordField';
 import StyledButton from '../../components/common/styledButton/StyledButton';
-import apiv1 from '../../utils/apiV1';
-import './signin.css';
 
-class SignIn extends Component {
+import apiv1 from '../../utils/apiV1';
+
+class ResetPassword extends Component {
   propTypes = {
     history: PropTypes.isRequired,
   };
 
   state = {
-    email: '',
     password: '',
+    confirmPassword: '',
   };
 
   handleFormSubmission = async event => {
     event.preventDefault();
     event.stopPropagation();
-    const { email, password } = this.state;
-    try {
-      const response = await apiv1.noAuth.post('/signin', { email, password });
-      if (response) {
-        const token = response.headers && response.headers['x-auth'];
+    const { password, confirmPassword } = this.state;
+    if (password === confirmPassword) {
+      try {
+        const response = await apiv1.auth.post('/resetPassword', { password });
+        const token = response && response.headers && response.headers['x-auth'];
         localStorage.setItem('authToken', token);
         const { history } = this.props;
         history.push('/');
+        console.log(response);
+      } catch (error) {
+        console.log(error.response);
       }
-
-      console.log(response);
-    } catch (error) {
-      console.log(error.response);
+    } else {
+      alert("passwords don't match");
     }
   };
 
@@ -44,19 +45,25 @@ class SignIn extends Component {
   };
 
   render() {
-    const { email, password } = this.state;
+    const { password, confirmPassword } = this.state;
     return (
       <div className="login-form">
         <Grid textAlign="center" style={{ height: '100%' }} verticalAlign="middle">
-          <Grid.Column style={{ width: 450 }}>
+          <Grid.Column style={{ maxWidth: 450 }}>
             <Header as="h2" color="teal" textAlign="center">
-              Sign In
+              Reset Password
             </Header>
             <Form size="large" onSubmit={this.handleFormSubmission}>
               <Segment stacked>
-                <EmailField name="email" value={email} onChange={this.onChange} required />
                 <PasswordField name="password" value={password} onChange={this.onChange} required />
-                <StyledButton text="Submit" size="large" color="teal" fluid />
+                <PasswordField
+                  name="confirmPassword"
+                  value={confirmPassword}
+                  onChange={this.onChange}
+                  required
+                  placeholder="Confirm Password"
+                />
+                <StyledButton text="Sign In" size="large" color="teal" fluid />
                 <Container className="forgot-password-container" textAlign="right">
                   <Link to="/forgotPassword">Forgot Password?</Link>
                 </Container>
@@ -73,4 +80,4 @@ class SignIn extends Component {
   }
 }
 
-export default SignIn;
+export default ResetPassword;

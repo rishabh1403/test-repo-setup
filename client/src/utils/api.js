@@ -7,14 +7,12 @@ const instance = axios.create({
   timeout: 10000,
 });
 
-const authToken = localStorage.getItem('authToken');
-
 const request = (method, url, data) => {
   const requestConfig = {
     method,
     url,
     headers: {
-      'x-auth': authToken,
+      'x-auth': localStorage.getItem('authToken'),
     },
   };
   if (method === 'get') {
@@ -30,6 +28,4 @@ const post = requestApi('post');
 const put = requestApi('put');
 const del = requestApi('delete');
 
-export {
-  get, post, put, del,
-};
+export { get, post, put, del };

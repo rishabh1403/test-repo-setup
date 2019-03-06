@@ -45,35 +45,6 @@ describe(`GET '/api/me'`, () => {
   });
 });
 
-describe('PUT /api/me/activateUser', () => {
-  it('should validate user email account if token correct', async () => {
-    expect.assertions(2);
-    const url = getServerBaseUrlWith(`/api/me/activateUser`);
-    const res = await fetch(url, {
-      method: httpMethods.put,
-      headers: {
-        'x-auth': User1SignupToken,
-      },
-    });
-    expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
-    const responseJson = await res.json();
-    expect(responseJson.user).toBeDefined();
-  });
-  it('should not validate user email account if token incorrect', async () => {
-    expect.assertions(2);
-    const url = getServerBaseUrlWith(`/api/me/activateUser`);
-    const res = await fetch(url, {
-      method: httpMethods.put,
-      headers: {
-        'x-auth': 'xyz',
-      },
-    });
-    expect(res.status).toBe(httpStatuses.UNAUTHORIZED_401);
-    const responseJson = await res.json();
-    expect(responseJson.error).toBeDefined();
-  });
-});
-
 describe('PUT /api/me/resetPassword', () => {
   it('should reset password if password valid', async () => {
     expect.assertions(2);

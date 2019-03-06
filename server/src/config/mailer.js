@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import { sendGridApiKey, isProd, isStag } from './index';
+import { sendGridApiKey, isProd, isStag, isDev } from './index';
 import { getClientBaseUrlWith } from '../utils/functions';
 
 sgMail.setApiKey(sendGridApiKey);
@@ -9,21 +9,20 @@ const sendMail = ({ to, subject, html }) => {
     name: 'Sneaky Snakes Team',
     email: 'sneakysnakesgame@gmail.com',
   };
-  if (isProd && isStag) {
-    sgMail.send({
-      to,
-      from,
-      subject,
-      html,
-    });
+  const msg = { from, to, subject, html };
+  if (isProd || isStag || isDev) {
+    console.log('mail sent: 1', msg);
+    // sgMail.send(msg);
+  } else {
+    // console.log('mail sent: 2', msg);
   }
 };
 
 export const sendWelcomeEmailWithToken = ({ mailTo, token }) => {
-  const url = getClientBaseUrlWith(`/confirmUser/token/${token}`);
+  const url = getClientBaseUrlWith(`/emailVerification/token/${token}`);
   sendMail({
     to: mailTo,
-    subject: 'Reset Password',
+    subject: 'Email Verification',
     html: `<p>
     <div>Hi,</div>
     <div>Glad that you signed up for our App</div>

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import { Menu } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 import './header.css';
@@ -10,6 +11,10 @@ export default class Header extends Component {
 
   handleItemClick = (e, { name }) => this.setState({ activeItem: name });
 
+  handleLogout = () => {
+    localStorage.removeItem('authToken');
+  };
+
   render() {
     const { activeItem } = this.state;
     const { children } = this.props;
@@ -17,9 +22,18 @@ export default class Header extends Component {
     return (
       <div className="main-container">
         <Menu size="massive" fixed="top">
-          <Menu.Item name="home" active={activeItem === 'home'} onClick={this.handleItemClick}>
-            Sneaky Snakes
-          </Menu.Item>
+          <Link to="/">
+            <Menu.Item name="home" active={activeItem === 'home'} onClick={this.handleItemClick}>
+              Sneaky Snakes
+            </Menu.Item>
+          </Link>
+          {localStorage.getItem('authToken') ? (
+            <Link to="/">
+              <Menu.Item name="logout" onClick={this.handleLogout}>
+                Logout
+              </Menu.Item>
+            </Link>
+          ) : null}
         </Menu>
         <div className="container">{children}</div>
       </div>
@@ -28,8 +42,5 @@ export default class Header extends Component {
 }
 
 Header.propTypes = {
-  children: PropTypes.oneOfType([
-    PropTypes.arrayOf(PropTypes.node),
-    PropTypes.node,
-  ]).isRequired,
+  children: PropTypes.oneOfType([PropTypes.arrayOf(PropTypes.node), PropTypes.node]).isRequired,
 };

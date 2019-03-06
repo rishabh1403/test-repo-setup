@@ -1,13 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import InputField from './InputField';
 
-const EmailField = ({ placeholder }) => (
-  <InputField type="email" fluid icon="user" iconPosition="left" placeholder={placeholder} />
+const EmailField = props => (
+  <InputField
+    type="email"
+    autoComplete="off"
+    placeholder="Email"
+    fluid
+    icon="user"
+    iconPosition="left"
+    {...props}
+  />
 );
 
-EmailField.propTypes = {
-  placeholder: PropTypes.string.isRequired,
-};
+// EmailField.propTypes = {
+//   placeholder: PropTypes.string.isRequired,
+// };
 
 export default EmailField;

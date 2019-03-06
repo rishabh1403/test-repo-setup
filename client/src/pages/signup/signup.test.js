@@ -17,8 +17,8 @@ describe('<SignUp />', () => {
     expect(wrapper.find(PasswordField).length).toBe(2);
   });
 
-  it('should render two Email Field', () => {
-    expect(wrapper.find(EmailField).length).toBe(2);
+  it('should render one Email Field', () => {
+    expect(wrapper.find(EmailField).length).toBe(1);
   });
 
   it('should render a sign in button', () => {

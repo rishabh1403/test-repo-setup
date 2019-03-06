@@ -18,14 +18,3 @@ export const resetPassword = async (req, res) => {
     return res.status(httpStatuses.BAD_REQUEST_400).send({ error: error.toString() });
   }
 };
-
-export const activateUser = async (req, res) => {
-  try {
-    const { user } = req;
-    user.active = true;
-    await user.save();
-    return res.send({ user });
-  } catch (error) {
-    return res.status(httpStatuses.BAD_REQUEST_400).send({ error: error.toString() });
-  }
-};

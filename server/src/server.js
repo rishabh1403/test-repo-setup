@@ -8,7 +8,7 @@ import setupRoutes from './routes';
 export const app = express();
 
 app.disable('x-powered-by');
-app.use(cors());
+app.use(cors({ exposedHeaders: 'x-auth' }));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 

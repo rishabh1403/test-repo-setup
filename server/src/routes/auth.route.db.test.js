@@ -11,11 +11,21 @@ beforeAll(async () => {
 });
 afterAll(() => server.close());
 
+let User1SignupToken;
 let User2SignupToken;
 beforeEach(async () => {
-  [, User2SignupToken] = await populateUsers();
+  [User1SignupToken, User2SignupToken] = await populateUsers();
 });
 afterEach(emptyUsers);
+
+async function validateUserWithToken(token) {
+  const url = getServerBaseUrlWith(`/auth/activateUser`);
+  return fetch(url, {
+    method: httpMethods.post,
+    body: JSON.stringify({ token }),
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
 
 describe('POST /auth/signup', () => {
   it('should create a user', async () => {
@@ -107,13 +117,7 @@ describe('POST /auth/signin', () => {
   });
   it('should signin user and return correct auth token', async () => {
     expect.assertions(4);
-    const urlActivateUser = getServerBaseUrlWith('/api/me/activateUser');
-    await fetch(urlActivateUser, {
-      method: httpMethods.put,
-      headers: {
-        'x-auth': User2SignupToken,
-      },
-    });
+    await validateUserWithToken(User2SignupToken);
     const url = getServerBaseUrlWith('/auth/signin');
     const params = {
       email: users[1].email,
@@ -180,6 +184,23 @@ describe('POST /auth/forgetPassword', () => {
         'Content-Type': 'application/json',
       },
     });
+    expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
+    const responseJson = await res.json();
+    expect(responseJson.error).toBeDefined();
+  });
+});
+
+describe('POST /auth/activateUser', () => {
+  it('should validate user email account if token correct', async () => {
+    expect.assertions(1);
+    const res = await validateUserWithToken(User1SignupToken);
+    expect(res.status).toBe(httpStatuses.SUCCESS_OK_200);
+    // const responseJson = await res.json();
+    // expect(responseJson.user).toBeDefined();
+  });
+  it('should not validate user email account if token incorrect', async () => {
+    expect.assertions(2);
+    const res = await validateUserWithToken('abc');
     expect(res.status).toBe(httpStatuses.BAD_REQUEST_400);
     const responseJson = await res.json();
     expect(responseJson.error).toBeDefined();

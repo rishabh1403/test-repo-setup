@@ -1,12 +1,19 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import InputField from './InputField';
 
-const PasswordField = ({ placeholder }) => (
-  <InputField type="password" fluid icon="lock" iconPosition="left" placeholder={placeholder} />
+const PasswordField = props => (
+  <InputField
+    type="password"
+    placeholder="password"
+    fluid
+    icon="lock"
+    iconPosition="left"
+    {...props}
+  />
 );
 
-PasswordField.propTypes = {
-  placeholder: PropTypes.string.isRequired,
-};
+// PasswordField.propTypes = {
+//   placeholder: PropTypes.string.isRequired,
+// };
 export default PasswordField;
