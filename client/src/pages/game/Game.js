@@ -63,7 +63,7 @@ class Game extends Component {
     this.setState({
       color: snakeColors[id],
     })
-
+    
     for (var x = 0; x < COLS; x++) {
       for (var y = 0; y < ROWS; y++) {
         switch (grid[x][y]) {
@@ -89,9 +89,9 @@ class Game extends Component {
         }
         // ctx.fillRect(x * tw, y * th, tw, th);
       }
-
+      
     }
-
+    
     ctx.fillStyle = "#000";
     ctx.fillText("score : " + score, 10, canvas.height - 10);
   }

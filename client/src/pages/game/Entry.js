@@ -19,7 +19,7 @@ class Entry extends Component {
 
   componentDidMount() {
     socket.on("connected", (data) => {
-      socket.emit("joinRoom", "abcdef");
+      socket.emit("joinRoom", this.props.match.params.id);
     });
 
     socket.on("Joined room", (data) => {

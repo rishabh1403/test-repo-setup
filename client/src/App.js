@@ -18,7 +18,7 @@ const App = () => (
         <Route exact path="/signup" component={SignUp} />
         <Route exact path="/forgotPassword" component={ForgotPassword} />
         <Route exact path="/leaderboard" component={LeaderboardPage} />
-        <Route exact path="/game" component={Entry} />
+        <Route exact path="/game/:id" component={Entry} />
         <Route exact path="*" component={Page404} />
       </Switch>
     </Header>
