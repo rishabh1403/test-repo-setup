@@ -7,7 +7,7 @@ import Leaderboard from './Leaderboard';
 import ScoreTable from './ScoreTable';
 
 describe('<Leaderboard /> Page', () => {
-  const wrapper = shallow(<Leaderboard userId="abc" />);
+  const wrapper = shallow(<Leaderboard />);
 
   it('should render a div', () => {
     expect(wrapper.find('div').length).toBe(1);

@@ -77,14 +77,14 @@ describe('Leaderboard data manipulation Helper functions', () => {
 
   describe('getPersonalScores', () => {
     it('should return High Score for specified user', async () => {
-      const score = await getPersonalScore({ userId: '' });
+      const score = await getPersonalScore();
       expect(score).toBe(sampleScores[0].value);
     });
   });
 
   describe('getPersonalRank', () => {
     it('should return Rank for specified user', async () => {
-      const rank = await getPersonalRank({ userId: '' });
+      const rank = await getPersonalRank();
       expect(rank).toBe(2);
     });
   });

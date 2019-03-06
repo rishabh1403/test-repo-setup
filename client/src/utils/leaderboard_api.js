@@ -27,24 +27,20 @@ const getUsersAndPageCount = async ({ currentPage }) => {
   return [users, pageCount];
 };
 
-const getPersonalScore = async ({ userId }) => {
-  const fetchedData = await get(`${leaderboardRoute}/user`, {
-    userId,
-  });
+const getPersonalScore = async () => {
+  const fetchedData = await get(`${leaderboardRoute}/user`);
   const personalScores = fetchedData.data;
-  if (personalScores) {
+  if (personalScores[0]) {
     const personalHighScore = personalScores[0].value;
     return personalHighScore;
   }
   return 0;
 };
 
-const getPersonalRank = async ({ userId }) => {
+const getPersonalRank = async () => {
   // Needs refactoring based on server side fixes
   try {
-    const fetchedPersonalRank = await get(`${leaderboardRoute}/rank`, {
-      userId,
-    });
+    const fetchedPersonalRank = await get(`${leaderboardRoute}/rank`);
     return fetchedPersonalRank.data;
   } catch (error) {
     return 0;

@@ -33,7 +33,7 @@ const getScores = async (req, res) => {
 };
 
 const getUserRank = async (req, res) => {
-  const { userId } = req.query;
+  const userId = req.user.id;
   sendResultOrError({
     query: queryRank(userId),
     successStatus: HTTP_SUCCESS_OK,
@@ -43,7 +43,7 @@ const getUserRank = async (req, res) => {
 };
 
 const getUserScores = async (req, res) => {
-  const { userId } = req.query;
+  const userId = req.user.id;
   sendResultOrError({
     query: queryUserScore(userId),
     successStatus: HTTP_SUCCESS_OK,
@@ -53,7 +53,8 @@ const getUserScores = async (req, res) => {
 };
 
 const createScore = async (req, res) => {
-  const { userId, value } = req.body;
+  const userId = req.user.id;
+  const { value } = req.body;
   sendResultOrError({
     query: insertScore(userId, value),
     successStatus: HTTP_CREATED,

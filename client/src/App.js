@@ -9,9 +9,6 @@ import Header from './components/common/header/Header';
 import Dashboard from './pages/dashboard/Dashboard';
 import LeaderboardPage from './pages/leaderboard/Leaderboard';
 
-// It will be removed and userId will be passed as Props to Leaderboard component
-const userId = '5c7c4f26e2168b648bcdd3e2';
-
 const App = () => (
   <BrowserRouter>
     <Header>
@@ -21,11 +18,7 @@ const App = () => (
         <Route exact path="/signup" component={SignUp} />
         <Route exact path="/forgotPassword" component={ForgotPassword} />
         <Route exact path="/dashboard" component={Dashboard} />
-        <Route
-          exact
-          path="/leaderboard"
-          render={routeProps => <LeaderboardPage {...{ userId }} {...routeProps} />}
-        />
+        <Route exact path="/leaderboard" component={LeaderboardPage} />
         <Route exact path="*" component={Page404} />
       </Switch>
     </Header>

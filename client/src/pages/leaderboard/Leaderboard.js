@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import {
   Grid, GridColumn, GridRow, Header,
 } from 'semantic-ui-react';
@@ -11,7 +10,7 @@ import {
   getPersonalRank,
 } from '../../utils/leaderboard_api';
 
-const Leaderboard = ({ userId }) => {
+const Leaderboard = () => {
   const [users, setUsers] = useState([]);
   const [pageCount, setPageCount] = useState(1);
   const [personalScore, setPersonalScore] = useState('loading...');
@@ -27,9 +26,9 @@ const Leaderboard = ({ userId }) => {
   };
 
   const getPageInfo = async () => {
-    const score = await getPersonalScore({ userId });
+    const score = await getPersonalScore();
     setPersonalScore(score);
-    const rank = await getPersonalRank({ userId });
+    const rank = await getPersonalRank();
     setPersonalRank(rank);
   };
 
@@ -89,10 +88,6 @@ const Leaderboard = ({ userId }) => {
       </Grid>
     </div>
   );
-};
-
-Leaderboard.propTypes = {
-  userId: PropTypes.string.isRequired,
 };
 
 export default Leaderboard;

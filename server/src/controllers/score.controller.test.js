@@ -57,13 +57,14 @@ insertScore.mockImplementation(async (userId, value) => {
 describe('Score API controllers', () => {
   const req = {
     body: {
-      userId: '5abc',
       value: 30,
+    },
+    user: {
+      id: '5abc',
     },
     query: {
       offset: '2',
       limit: '10',
-      userId: '5abc',
     },
   };
   const res = {
@@ -130,7 +131,7 @@ describe('Score API controllers', () => {
       });
 
       it('should query DB with userID', () => {
-        expect(queryRank).toBeCalledWith(req.query.userId);
+        expect(queryRank).toBeCalledWith(req.user.id);
       });
 
       it('should set HTTP STATUS OK on success', () => {
@@ -144,12 +145,12 @@ describe('Score API controllers', () => {
 
     describe('FAILURE', () => {
       beforeEach(() => {
-        req.query.userId = null; // To create error
+        req.user.id = null; // To create error
         getUserRank(req, res);
       });
 
       afterEach(() => {
-        req.query.userId = '5abc'; // Restore after error Testing
+        req.user.id = '5abc'; // Restore after error Testing
       });
 
       it('should set HTTP SERVER ERROR on fail', () => {
@@ -169,7 +170,7 @@ describe('Score API controllers', () => {
       });
 
       it('should call db function with userID', () => {
-        expect(queryUserScore).toBeCalledWith(req.query.userId);
+        expect(queryUserScore).toBeCalledWith(req.user.id);
       });
 
       it('should set HTTP STATUS OK on success', () => {
@@ -183,7 +184,7 @@ describe('Score API controllers', () => {
 
     describe('FAILURE', () => {
       beforeEach(() => {
-        req.query.userId = null; // To create error
+        req.user.id = null; // To create error
         getUserScores(req, res);
       });
 
@@ -193,6 +194,10 @@ describe('Score API controllers', () => {
 
       it('should send error in response on fail', () => {
         expect(res.jsonData.error).toEqual(error);
+      });
+
+      afterEach(() => {
+        req.user.id = '5abc';
       });
     });
   });
@@ -204,7 +209,7 @@ describe('Score API controllers', () => {
       });
 
       it('should call db function with userId and value', () => {
-        expect(insertScore).toBeCalledWith(req.body.userId, req.body.value);
+        expect(insertScore).toBeCalledWith(req.user.id, req.body.value);
       });
 
       it('should set HTTP CREATED status on success', () => {

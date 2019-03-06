@@ -15,7 +15,6 @@ describe('Leaderboard APIs and DB fetch', async () => {
   let baseUrl;
   let generateUrl;
   const sampleUser = {
-    userId: users[0]._id, // eslint-disable-line no-underscore-dangle
     value: 20,
   };
   // To be saved in DB before running GET API request Tests
@@ -103,10 +102,9 @@ describe('Leaderboard APIs and DB fetch', async () => {
 
     describe('GET /api/leaderboard/rank', () => {
       it('should get User Rank', async () => {
-        // This User has third highest score, so rank should be 3
-        const expectedRank = 3;
-        const { user } = DBScores[2];
-        const url = generateUrl(`/api/leaderboard/rank?userId=${user}`);
+        // This User whose token is used, has first highest score
+        const expectedRank = 1;
+        const url = generateUrl(`/api/leaderboard/rank`);
         const res = await fetch(url, {
           headers: {
             'x-auth': tokens[0],
@@ -120,8 +118,7 @@ describe('Leaderboard APIs and DB fetch', async () => {
     describe('GET /api/leaderboard/user', () => {
       let scoreCard;
       beforeAll(async () => {
-        const { user } = DBScores[0];
-        const url = generateUrl(`/api/leaderboard/user?userId=${user}`);
+        const url = generateUrl(`/api/leaderboard/user`);
         const res = await fetch(url, {
           headers: {
             'x-auth': tokens[0],
