@@ -1,5 +1,5 @@
 import socketio from 'socket.io';
-import { gameConstants } from '../utils/contants';
+import { gameConstants } from '../utils/constants';
 import Grid from './Grid';
 import Snake from './Snake';
 

@@ -1,10 +1,10 @@
 /* eslint-disable */
 
 import React, { Component } from 'react';
-
+import apiBase from '../../config';
 import io from 'socket.io-client';
 import Game from './Game';
-const socket = io('http://localhost:8000/');
+const socket = io(apiBase);
 // socket.emit("data", "hey");
 
 

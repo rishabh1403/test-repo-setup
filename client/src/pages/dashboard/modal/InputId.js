@@ -17,7 +17,7 @@ const InputId = () => {
   };
 
   if (isRedirected) {
-    return <Redirect to={`/game?id=${gameId}`} />;
+    return <Redirect to={`/game/${gameId}`} />;
   }
   return (
     <div className="modal-content-container">
