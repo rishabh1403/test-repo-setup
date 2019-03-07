@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 import io from 'socket.io-client';
 import Game from './Game';
-const socket = io('http://10.178.3.207:8000/');
+const socket = io('http://localhost:8000/');
 // socket.emit("data", "hey");
 
 
