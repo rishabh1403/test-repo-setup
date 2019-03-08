@@ -119,6 +119,7 @@ class Game extends Component {
     socket.on("draw", (data) => {
       console.log(data);
       console.log(socket.id);
+      score = data.score[socket.id];
       this.draw(data, socket.id)
     })
     this.loop();
