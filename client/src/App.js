@@ -12,6 +12,7 @@ import Header from './components/common/header/Header';
 import Dashboard from './pages/dashboard/Dashboard';
 import LeaderboardPage from './pages/leaderboard/Leaderboard';
 import { requireAuth, requireNoAuth } from './utils/auth.util';
+import Entry from './pages/game/Entry';
 
 const App = () => (
   <BrowserRouter>
@@ -26,6 +27,7 @@ const App = () => (
         <Route exact path="/resetPassword" component={requireAuth(ResetPassword)} />
         <Route exact path="/dashboard" component={requireAuth(Dashboard)} />
         <Route exact path="/leaderboard" component={requireAuth(LeaderboardPage)} />
+        <Route exact path="/game/:id" component={Entry} />
         <Route exact path="*" component={Page404} />
       </Switch>
     </Header>

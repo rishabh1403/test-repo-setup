@@ -8,7 +8,7 @@ const ShowId = () => {
     <div className="modal-content-container">
       Share this ID with your friend: &nbsp;
       <p>{gameId}</p>
-      <a href={`/game?id=${gameId}`}>
+      <a href={`/game/${gameId}`}>
         <button className="game-button" type="button">
           Go to Game
         </button>
