@@ -12,9 +12,9 @@ const sendMail = ({ to, subject, html }) => {
   const msg = { from, to, subject, html };
   if (isProd || isStag || isDev) {
     console.log('mail sent: 1', msg);
-    // sgMail.send(msg);
+    sgMail.send(msg);
   } else {
-    // console.log('mail sent: 2', msg);
+    console.log('mail sent: 2', msg);
   }
 };
 
